@@ -1,7 +1,8 @@
 const express = require('express');
 const cookieparser = require('cookie-parser');
 const dotenv = require('dotenv');
-const authRoutes=require("./src/routes/auth.routes")
+const authRoutes = require("./src/routes/auth.routes")
+const foodRoutes = require('./src/routes/food.routes')
 
 // Load environment variables
 dotenv.config({ path: './.env' });
@@ -20,7 +21,8 @@ app.get("/", (req, res) => {
 
 // API routes mounting
 // app.use("/api/v1", yourRouterHere);
-app.use("/api/auth",authRoutes);
+app.use("/api/auth", authRoutes);
+app.use('/api/food',foodRoutes);
 
 // Database connection
 const { connectDB } = require("./src/db/db");
