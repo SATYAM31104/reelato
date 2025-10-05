@@ -11,8 +11,6 @@ const upload = multer({
 // POST /api/food [protected] - Add food item
 router.post('/', authFoodPartnerMiddleware, upload.single("video"), foodController.createFood)
 // GET /api/food [public] - Get all food items
-router.get('/', (req, res) => {
-    res.json({ message: "Get food items endpoint - coming soon" });
-});
+router.get('/', foodController.getAllFoodItems)
 
 module.exports = router;
