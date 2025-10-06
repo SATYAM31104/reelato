@@ -4,6 +4,11 @@ import UserRegister from '../components/UserRegister'
 import UserLogin from '../components/UserLogin'
 import FoodPartnerRegister from '../components/FoodPartnerRegister'
 import FoodPartnerLogin from '../components/FoodPartnerLogin'
+import GeneralPage from '../components/GeneralPage'
+import TestBackend from '../components/TestBackend'
+import CreateFood from '../food-partner/CreateFood'
+import HomePage from '../general/home'
+import RestaurantStore from '../components/RestaurantStore'
 
 function AppRoutes() {
   return (
@@ -14,6 +19,11 @@ function AppRoutes() {
         <Route path="/user/login" element={<UserLogin />} />
         <Route path="/food-partner/register" element={<FoodPartnerRegister />} />
         <Route path="/food-partner/login" element={<FoodPartnerLogin />} />
+        <Route path="/general" element={<GeneralPage />} />
+        <Route path="/feed" element={<HomePage />} />
+        <Route path="/restaurant/:restaurantId" element={<RestaurantStore />} />
+        <Route path="/test" element={<TestBackend />} />
+        <Route path="/create-food" element={<CreateFood/>} />
       </Routes>
     </Router>
   )

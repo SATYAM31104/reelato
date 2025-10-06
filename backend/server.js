@@ -25,6 +25,11 @@ app.get("/", (req, res) => {
     res.send(`<h1>Hello this is my home page</h1>`);
 });
 
+// Test route
+app.get("/api/test", (req, res) => {
+    res.json({ message: "Backend is working!", timestamp: new Date().toISOString() });
+});
+
 // API routes mounting
 // app.use("/api/v1", yourRouterHere);
 app.use("/api/auth", authRoutes);

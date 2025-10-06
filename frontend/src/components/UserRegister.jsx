@@ -2,8 +2,11 @@ import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 function UserRegister() {
+
+  const navigate = useNavigate();
   // 🔥 ADD YOUR STATE LOGIC HERE
   const [formData, setFormData] = useState({
     name: '',
@@ -20,7 +23,7 @@ function UserRegister() {
   const handleInputChange = (e) => {
     // Update formData state when user types
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    
+
     // Clear success message if user starts typing again
     if (success) {
       setSuccess(false);
@@ -29,17 +32,29 @@ function UserRegister() {
 
   // 🔥 ADD YOUR FORM VALIDATION LOGIC HERE
   const validateForm = () => {
-    // TODO: Add validation logic here
-    // 1. Check if all fields are filled
-    // 2. Validate email format
-    // 3. Check password strength (min 6 chars)
-    // 4. Ensure passwords match
-    // 5. Set error messages if validation fails
-    // Example: 
-    // if (formData.password !== formData.confirmPassword) {
-    //   setError('Passwords do not match');
-    //   return false;
-    // }
+    // Check if all fields are filled
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError('All fields are required');
+      return false;
+    }
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    // Check password strength (min 6 chars)
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+
+    // Ensure passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+
     return true;
   };
 
@@ -51,15 +66,8 @@ function UserRegister() {
       setLoading(true);
       setError('');
       setSuccess(false);
-
-      // Basic validation
-      if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match');
-        return;
-      }
-
-      if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters');
+      // Validate form
+      if (!validateForm()) {
         return;
       }
 
@@ -68,14 +76,16 @@ function UserRegister() {
         name: formData.name,
         email: formData.email,
         password: formData.password
+      }, {
+        withCredentials: true
       });
 
       console.log('Registration successful:', response.data);
-      
+
       // Set success state and user data
       setSuccess(true);
       setUserData(response.data.user);
-      
+
       // Clear form
       setFormData({
         name: '',
@@ -84,9 +94,26 @@ function UserRegister() {
         confirmPassword: ''
       });
 
+      // Redirect to general feed page after 2 seconds to show success message
+      setTimeout(() => {
+        navigate("/general");
+      }, 2000);
+
     } catch (error) {
-      console.log('Registration error:', error);
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+
+      if (error.response) {
+        // Server responded with error status
+        setError(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        // Request was made but no response received
+        setError('No response from server. Please check if the backend is running.');
+      } else {
+        // Something else happened
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -123,11 +150,11 @@ function UserRegister() {
               Welcome to ReelBites, {userData?.name}!
             </h3>
             <p style={{ margin: '0', opacity: '0.9' }}>
-              Your account has been created successfully. You can now sign in to start discovering amazing food videos!
+              Your account has been created successfully. Redirecting you to the food feed to start discovering amazing videos!
             </p>
             <div style={{ marginTop: '1rem' }}>
-              <a 
-                href="/user/login" 
+              <a
+                href="/user/login"
                 style={{
                   display: 'inline-block',
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',

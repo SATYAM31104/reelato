@@ -2,14 +2,16 @@ import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 function FoodPartnerRegister() {
+  const navigate = useNavigate();
   // 🔥 ADD YOUR STATE LOGIC HERE
   const [formData, setFormData] = useState({
     restaurantName: '',
     ownerName: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     address: '',
     password: ''
   });
@@ -22,68 +24,118 @@ function FoodPartnerRegister() {
   const handleInputChange = (e) => {
     // Update formData state when user types
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    
+
     // Clear success message if user starts typing again
     if (success) {
       setSuccess(false);
     }
   };
 
-  // 🔥 ADD YOUR FORM VALIDATION LOGIC HERE
+  // 🔥 FORM VALIDATION LOGIC
   const validateForm = () => {
-    // TODO: Add validation logic here
-    // 1. Check if all required fields are filled
-    // 2. Validate email format
-    // 3. Validate phone number format
-    // 4. Check password strength
-    // 5. Set error messages if validation fails
+    // Check if all required fields are filled
+    if (!formData.restaurantName || !formData.ownerName || !formData.email || !formData.phone || !formData.address || !formData.password) {
+      setError('Please fill in all fields');
+      return false;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    // Validate phone number (basic check)
+    if (formData.phone.length < 10) {
+      setError('Please enter a valid phone number (minimum 10 digits)');
+      return false;
+    }
+
+    // Check password strength
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+
+    // Validate restaurant name length
+    if (formData.restaurantName.length < 2) {
+      setError('Restaurant name must be at least 2 characters');
+      return false;
+    }
+
+    // Validate owner name length
+    if (formData.ownerName.length < 2) {
+      setError('Owner name must be at least 2 characters');
+      return false;
+    }
+
     return true;
   };
 
   // 🔥 ADD YOUR API CALL LOGIC HERE
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError('');
       setSuccess(false);
-      
-      // Basic validation
-      if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters');
+
+      // Validate form data
+      if (!validateForm()) {
         return;
       }
-      
+
       // API call to register food partner
       const response = await axios.post('http://localhost:3000/api/auth/foodpartner/register', {
         restaurantName: formData.restaurantName,
         ownerName: formData.ownerName,
         email: formData.email,
-        phoneNumber: formData.phoneNumber,
+        phone: formData.phone, // Fixed field name
         address: formData.address,
         password: formData.password
+      }, {
+        withCredentials: true // This ensures cookies are sent and received
       });
-      
+
       console.log('Food Partner registration successful:', response.data);
-      
+      navigate("/create-food");
+
       // Set success state and partner data
       setSuccess(true);
       setPartnerData(response.data.foodPartner);
-      
+
       // Clear form
       setFormData({
         restaurantName: '',
         ownerName: '',
         email: '',
-        phoneNumber: '',
+        phone: '',
         address: '',
         password: ''
       });
-      
+
+      // Redirect to create food page after 2 seconds to show success message
+      setTimeout(() => {
+        navigate("/create-food");
+      }, 2000);
+
     } catch (error) {
-      console.log('Registration error:', error);
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Food Partner registration error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+
+      if (error.response) {
+        // Server responded with error status
+        setError(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        // Request was made but no response received
+        setError('No response from server. Please check if the backend is running.');
+      } else {
+        // Something else happened
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -116,11 +168,11 @@ function FoodPartnerRegister() {
               Welcome to ReelBites, {partnerData?.restaurantName}!
             </h3>
             <p style={{ margin: '0', opacity: '0.9' }}>
-              Your food partner account has been created successfully. You can now sign in to start showcasing your delicious food!
+              Your food partner account has been created successfully. Redirecting you to the food creation dashboard to start adding your delicious food!
             </p>
             <div style={{ marginTop: '1rem' }}>
-              <a 
-                href="/food-partner/login" 
+              <a
+                href="/food-partner/login"
                 style={{
                   display: 'inline-block',
                   backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -154,7 +206,7 @@ function FoodPartnerRegister() {
               {error}
             </div>
           )}
-          
+
           <div className="form-group">
             <label className="form-label">Restaurant Name</label>
             <input
@@ -198,10 +250,10 @@ function FoodPartnerRegister() {
             <label className="form-label">Phone Number</label>
             <input
               type="tel"
-              name="phoneNumber"
+              name="phone"
               className="form-input"
-              placeholder="Enter phone number"
-              value={formData.phoneNumber}
+              placeholder="Enter phone number (e.g., +1234567890)"
+              value={formData.phone}
               onChange={handleInputChange}
               required
             />

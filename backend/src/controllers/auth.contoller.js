@@ -6,7 +6,13 @@ const foodPartnerModel = require('../models/foodpartner.model');
 
 async function registerUser(req, res) {
     try {
+        console.log('User registration request received:', req.body);
         const { name, email, password } = req.body;
+        
+        // Validate required fields
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
         
         // Check if user already exists
         const isUserExist = await userModel.findOne({ email });
@@ -24,11 +30,19 @@ async function registerUser(req, res) {
             password: hashedPassword 
         });
 
+        console.log('User created successfully:', user._id);
+
         // Generate JWT token
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
         // Set cookie and send response
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, { 
+            httpOnly: true,
+            secure: false, // Set to true in production with HTTPS
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        });
+        console.log('Cookie set for user:', user._id);
         res.status(201).json({
             message: "User registered successfully",
             user: { 
@@ -54,7 +68,12 @@ async function loginUser(req, res) {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, { 
+            httpOnly: true,
+            secure: false, // Set to true in production with HTTPS
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        });
         res.status(200).json({
             message: "User logged in successfully",
             user: { name: user.name, email: user.email }
@@ -90,7 +109,12 @@ async function registerFoodPartner(req, res) {
             address
         });
         const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, { 
+            httpOnly: true,
+            secure: false, // Set to true in production with HTTPS
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        });
         res.status(201).json({
             message: "Food Partner registered successfully",
             foodPartner: { 
@@ -105,6 +129,7 @@ async function registerFoodPartner(req, res) {
 }
 async function loginFoodPartner(req, res) {
     try {
+        console.log('Food Partner login request received:', req.body);
         const { email, password } = req.body;
         const foodPartner = await foodPartnerModel.findOne({ email });
         if (!foodPartner) {
@@ -115,7 +140,13 @@ async function loginFoodPartner(req, res) {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
         const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, { 
+            httpOnly: true,
+            secure: false, // Set to true in production with HTTPS
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        });
+        console.log('Cookie set for food partner:', foodPartner._id);
         res.status(200).json({
             message: "Food Partner logged in successfully",
             foodPartner: { 

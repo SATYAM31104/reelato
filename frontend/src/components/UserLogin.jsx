@@ -2,8 +2,11 @@ import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 function UserLogin() {
+  const navigate = useNavigate();
+
   // 🔥 ADD YOUR STATE LOGIC HERE
   const [formData, setFormData] = useState({
     email: '',
@@ -11,11 +14,17 @@ function UserLogin() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   // 🔥 ADD YOUR INPUT CHANGE LOGIC HERE
   const handleInputChange = (e) => {
     // Update formData state when user types
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    // Clear success message if user starts typing again
+    if (success) {
+      setSuccess(false);
+    }
   };
 
   // 🔥 ADD YOUR FORM VALIDATION LOGIC HERE
@@ -30,44 +39,62 @@ function UserLogin() {
   // 🔥 ADD YOUR API CALL LOGIC HERE
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // TODO: Implement login logic
-    // 1. Set loading to true
-    // 2. Clear previous errors
-    // 3. Validate form data
-    // 4. Make API call to backend
-    // 5. Store JWT token in localStorage/cookies
-    // 6. Redirect to dashboard on success
-    
-    console.log('Login submitted:', formData);
-    
-    // Example API call structure:
-    // try {
-    //   setLoading(true);
-    //   setError('');
-    //   
-    //   if (!validateForm()) return;
-    //   
-    //   const response = await axios.post('http://localhost:3000/api/auth/user/login', {
-    //     email: formData.email,
-    //     password: formData.password
-    //   });
-    //   
-    //   // Store token and redirect
-    //   localStorage.setItem('token', response.data.token);
-    //   // Navigate to user dashboard
-    //   
-    // } catch (error) {
-    //   setError(error.response?.data?.message || 'Login failed');
-    // } finally {
-    //   setLoading(false);
-    // }
+
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess(false);
+
+      // Basic validation
+      if (!formData.email || !formData.password) {
+        setError('Please fill in all fields');
+        return;
+      }
+
+      // API call to login user
+      const response = await axios.post('http://localhost:3000/api/auth/user/login', {
+        email: formData.email,
+        password: formData.password
+      }, {
+        withCredentials: true
+      });
+
+      console.log('Login successful:', response.data);
+
+      // Set success state
+      setSuccess(true);
+
+      // Clear form
+      setFormData({
+        email: '',
+        password: ''
+      });
+
+      // Redirect to general feed page after 1 second
+      setTimeout(() => {
+        navigate("/general");
+      }, 1000);
+
+    } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response);
+
+      if (error.response) {
+        setError(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        setError('No response from server. Please check if the backend is running.');
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header-with-shuffle">
-          <Shuffle 
+          <Shuffle
             text="ReelBites"
             shuffleDirection="right"
             duration={0.35}
@@ -83,16 +110,48 @@ function UserLogin() {
           <p className="auth-subtitle">Sign in to your ReelBites account</p>
         </div>
 
+        {/* 🎉 SUCCESS MESSAGE */}
+        {success && (
+          <div style={{
+            backgroundColor: '#10b981',
+            color: 'white',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            marginBottom: '1.5rem',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+          }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem', fontWeight: '600' }}>
+              Welcome back to ReelBites!
+            </h3>
+            <p style={{ margin: '0', opacity: '0.9' }}>
+              Login successful! Redirecting you to the food feed...
+            </p>
+          </div>
+        )}
+
         <form className="auth-form" onSubmit={handleSubmit}>
-          {/* 🔥 ADD ERROR DISPLAY LOGIC HERE */}
-          {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-          
+          {/* 🔥 ERROR DISPLAY */}
+          {error && (
+            <div style={{
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+              padding: '1rem',
+              borderRadius: '8px',
+              marginBottom: '1rem',
+              border: '1px solid #fecaca'
+            }}>
+              {error}
+            </div>
+          )}
+
           <div className="form-group">
             <label className="form-label">Email Address</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               name="email"
-              className="form-input" 
+              className="form-input"
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleInputChange}
@@ -102,10 +161,10 @@ function UserLogin() {
 
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               name="password"
-              className="form-input" 
+              className="form-input"
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleInputChange}
