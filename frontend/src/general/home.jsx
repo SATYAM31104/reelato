@@ -13,6 +13,7 @@ const HomePage = () => {
     const [userType, setUserType] = useState(null)
     const [likes, setLikes] = useState({})
     const [saves, setSaves] = useState({})
+    const [reactions, setReactions] = useState({})
     const [showComments, setShowComments] = useState(false)
     const [comments, setComments] = useState({})
     const [newComment, setNewComment] = useState('')
@@ -120,6 +121,57 @@ const HomePage = () => {
                 alert('Session expired. Please login again.')
             }
         }
+    }
+
+    // Handle reactions (love, hungry, fire)
+    const handleReaction = async (foodId, reactionType) => {
+        if (!isLoggedIn) {
+            alert('Please login to react to videos')
+            return
+        }
+
+        try {
+            // For now, we'll store reactions locally and show fun animations
+            setReactions(prev => ({
+                ...prev,
+                [foodId]: {
+                    ...prev[foodId],
+                    [reactionType]: !prev[foodId]?.[reactionType]
+                }
+            }))
+
+            // Show reaction animation
+            showReactionAnimation(reactionType)
+        } catch (error) {
+            console.error('Error reacting to food:', error)
+        }
+    }
+
+    // Show reaction animation
+    const showReactionAnimation = (reactionType) => {
+        const emojis = {
+            love: '😍',
+            hungry: '🤤',
+            fire: '🔥'
+        }
+
+        // Create floating emoji animation
+        const emoji = document.createElement('div')
+        emoji.textContent = emojis[reactionType]
+        emoji.style.cssText = `
+            position: fixed;
+            right: 60px;
+            bottom: 200px;
+            font-size: 30px;
+            z-index: 1000;
+            pointer-events: none;
+            animation: floatUp 2s ease-out forwards;
+        `
+        document.body.appendChild(emoji)
+
+        setTimeout(() => {
+            document.body.removeChild(emoji)
+        }, 2000)
     }
 
     // Handle save/unsave
@@ -343,25 +395,74 @@ const HomePage = () => {
                             gap: '20px',
                             alignItems: 'center'
                         }}>
-                            {/* Like Button */}
+                            {/* Reactions */}
                             <div style={{ textAlign: 'center' }}>
-                                <button
-                                    onClick={() => handleLike(video.id)}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        fontSize: '28px',
-                                        cursor: 'pointer',
-                                        color: likes[video.id] ? '#ff6b6b' : 'white',
-                                        marginBottom: '5px'
-                                    }}
-                                >
-                                    {likes[video.id] ? '❤️' : '🤍'}
-                                </button>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '8px'
+                                }}>
+                                    {/* Like */}
+                                    <button
+                                        onClick={() => handleLike(video.id)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            fontSize: '24px',
+                                            cursor: 'pointer',
+                                            color: likes[video.id] ? '#ff6b6b' : 'white'
+                                        }}
+                                    >
+                                        {likes[video.id] ? '❤️' : '🤍'}
+                                    </button>
+
+                                    {/* Love */}
+                                    <button
+                                        onClick={() => handleReaction(video.id, 'love')}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            fontSize: '20px',
+                                            cursor: 'pointer',
+                                            color: reactions[video.id]?.love ? '#ff6b6b' : 'white'
+                                        }}
+                                    >
+                                        😍
+                                    </button>
+
+                                    {/* Hungry */}
+                                    <button
+                                        onClick={() => handleReaction(video.id, 'hungry')}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            fontSize: '20px',
+                                            cursor: 'pointer',
+                                            color: reactions[video.id]?.hungry ? '#feca57' : 'white'
+                                        }}
+                                    >
+                                        🤤
+                                    </button>
+
+                                    {/* Fire */}
+                                    <button
+                                        onClick={() => handleReaction(video.id, 'fire')}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            fontSize: '20px',
+                                            cursor: 'pointer',
+                                            color: reactions[video.id]?.fire ? '#ff9ff3' : 'white'
+                                        }}
+                                    >
+                                        🔥
+                                    </button>
+                                </div>
                                 <div style={{
                                     color: 'white',
                                     fontSize: '12px',
-                                    fontWeight: 'bold'
+                                    fontWeight: 'bold',
+                                    marginTop: '5px'
                                 }}>
                                     {video.likeCount}
                                 </div>
@@ -529,7 +630,7 @@ const HomePage = () => {
                 )}
 
                 <button
-                    onClick={() => navigate('/general')}
+                    onClick={() => navigate('/search')}
                     style={{
                         background: 'none',
                         border: 'none',
@@ -543,25 +644,48 @@ const HomePage = () => {
                     }}
                 >
                     🔍
-                    <span style={{ fontSize: '10px' }}>Browse</span>
+                    <span style={{ fontSize: '10px' }}>Search</span>
+                </button>
+
+                <button
+                    onClick={() => navigate('/trending')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}
+                >
+                    🔥
+                    <span style={{ fontSize: '10px' }}>Trending</span>
+                </button>
+
+                <button
+                    onClick={() => navigate('/ai-recognition')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}
+                >
+                    🤖
+                    <span style={{ fontSize: '10px' }}>AI</span>
                 </button>
 
                 {isLoggedIn ? (
                     <button
-                        onClick={async () => {
-                            try {
-                                await axios.post('http://localhost:3000/api/auth/logout', {}, {
-                                    withCredentials: true
-                                })
-                                setIsLoggedIn(false)
-                                setUserType(null)
-                                localStorage.removeItem('isLoggedIn')
-                                localStorage.removeItem('userType')
-                                navigate('/')
-                            } catch (error) {
-                                console.error('Logout error:', error)
-                            }
-                        }}
+                        onClick={() => navigate('/profile')}
                         style={{
                             background: 'none',
                             border: 'none',
@@ -702,6 +826,21 @@ const HomePage = () => {
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
+                    }
+                    
+                    @keyframes floatUp {
+                        0% {
+                            opacity: 1;
+                            transform: translateY(0) scale(1);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: translateY(-50px) scale(1.2);
+                        }
+                        100% {
+                            opacity: 0;
+                            transform: translateY(-100px) scale(0.8);
+                        }
                     }
                 `}
             </style>
