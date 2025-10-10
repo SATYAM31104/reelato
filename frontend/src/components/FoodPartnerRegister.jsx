@@ -1,7 +1,7 @@
 import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState } from 'react'
-import axiosInstance from '../api/axiosInstance'
+import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 function FoodPartnerRegister() {
@@ -88,7 +88,7 @@ function FoodPartnerRegister() {
       }
 
       // API call to register food partner
-      const response = await axiosInstance.post('/api/auth/foodpartner/register', {
+      const response = await axios.post('http://localhost:3000/api/auth/foodpartner/register', {
         restaurantName: formData.restaurantName,
         ownerName: formData.ownerName,
         email: formData.email,

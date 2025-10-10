@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axiosInstance from '../api/axiosInstance'
+import axios from 'axios'
 
 const TrendingPage = () => {
     const navigate = useNavigate()

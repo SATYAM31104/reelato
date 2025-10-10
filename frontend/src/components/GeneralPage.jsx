@@ -2,7 +2,7 @@ import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axiosInstance from '../api/axiosInstance'
+import axios from 'axios'
 
 function GeneralPage() {
   const [videos, setVideos] = useState([])
@@ -13,12 +13,12 @@ function GeneralPage() {
 
   // Check authentication status
   const [userType, setUserType] = useState(null) // 'user' or 'foodPartner'
-  
+
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
         // Try to get user info to check if logged in
-        const response = await axiosInstance.get('/api/auth/me', {
+        const response = await axios.get('http://localhost:3000/api/auth/me', {
           withCredentials: true
         })
         if (response.data) {
@@ -40,10 +40,10 @@ function GeneralPage() {
     const fetchFoodItems = async () => {
       try {
         setLoading(true)
-        const response = await axiosInstance.get('/api/food')
-        
+        const response = await axios.get('http://localhost:3000/api/food')
+
         console.log('Food items response:', response.data)
-        
+
         // Transform backend data to match our video format
         const transformedVideos = response.data.data.map((item, index) => ({
           id: item._id,
@@ -60,7 +60,7 @@ function GeneralPage() {
           views: Math.floor(Math.random() * 50) + 'K', // Mock views for now
           likes: Math.floor(Math.random() * 10) + 'K'  // Mock likes for now
         }))
-        
+
         setVideos(transformedVideos)
         setError('')
       } catch (error) {
@@ -87,7 +87,7 @@ function GeneralPage() {
         zIndex: 100
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
-          <Shuffle 
+          <Shuffle
             text="ReelBites"
             shuffleDirection="right"
             duration={0.3}
@@ -97,14 +97,14 @@ function GeneralPage() {
             <a href="/" style={{ color: 'var(--text-color)', textDecoration: 'none' }}>Home</a>
             <a href="/general" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}>Browse</a>
             <a href="/feed" style={{ color: 'var(--text-color)', textDecoration: 'none' }}>Full Feed</a>
-            
+
             {/* Food Partner Upload Option */}
             {isLoggedIn && userType === 'foodPartner' && (
-              <a 
-                href="/create-food" 
-                style={{ 
-                  color: '#ff6b6b', 
-                  textDecoration: 'none', 
+              <a
+                href="/create-food"
+                style={{
+                  color: '#ff6b6b',
+                  textDecoration: 'none',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
@@ -114,13 +114,13 @@ function GeneralPage() {
                 🍽️ Upload Your Own Food
               </a>
             )}
-            
+
             <div style={{ display: 'flex', gap: '1rem' }}>
               {isLoggedIn ? (
                 <button
                   onClick={async () => {
                     try {
-                      await axiosInstance.post('/api/auth/logout', {}, {
+                      await axios.post('http://localhost:3000/api/auth/logout', {}, {
                         withCredentials: true
                       })
                       setIsLoggedIn(false)
@@ -226,16 +226,16 @@ function GeneralPage() {
                 transition: 'transform 0.2s, box-shadow 0.2s',
                 cursor: 'pointer'
               }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-              }}
-              onClick={() => navigate(`/restaurant/${video.restaurantId}`)}>
-                
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                }}
+                onClick={() => navigate(`/restaurant/${video.restaurantId}`)}>
+
                 {/* Video Thumbnail/Preview */}
                 <div style={{
                   height: '250px',
@@ -264,7 +264,7 @@ function GeneralPage() {
                       `
                     }}
                   />
-                  
+
                   {/* Play Button Overlay */}
                   <div style={{
                     position: 'absolute',
@@ -301,23 +301,23 @@ function GeneralPage() {
 
                 {/* Video Info */}
                 <div style={{ padding: '1.5rem' }}>
-                  <h3 style={{ 
-                    margin: '0 0 0.5rem 0', 
-                    fontSize: '1.2rem', 
+                  <h3 style={{
+                    margin: '0 0 0.5rem 0',
+                    fontSize: '1.2rem',
                     fontWeight: '600',
                     color: 'var(--text-color)'
                   }}>
                     {video.title}
                   </h3>
-                  
-                  <p style={{ 
-                    margin: '0 0 1rem 0', 
-                    color: 'var(--text-secondary)', 
+
+                  <p style={{
+                    margin: '0 0 1rem 0',
+                    color: 'var(--text-secondary)',
                     fontSize: '0.9rem',
                     lineHeight: '1.4'
                   }}>
-                    {video.description.length > 80 
-                      ? video.description.substring(0, 80) + '...' 
+                    {video.description.length > 80
+                      ? video.description.substring(0, 80) + '...'
                       : video.description
                     }
                   </p>
@@ -329,15 +329,15 @@ function GeneralPage() {
                     borderRadius: '8px',
                     marginBottom: '1rem'
                   }}>
-                    <h4 style={{ 
-                      margin: '0 0 0.5rem 0', 
-                      fontSize: '1rem', 
+                    <h4 style={{
+                      margin: '0 0 0.5rem 0',
+                      fontSize: '1rem',
                       fontWeight: '600',
                       color: '#ff6b6b'
                     }}>
                       🏪 {video.restaurant}
                     </h4>
-                    
+
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                       <p style={{ margin: '0.25rem 0' }}>
                         👨‍🍳 <strong>Owner:</strong> {video.ownerName}
@@ -355,22 +355,22 @@ function GeneralPage() {
                   </div>
 
                   {/* Stats and Actions */}
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '1rem'
                   }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      gap: '1rem', 
-                      fontSize: '0.8rem', 
-                      color: 'var(--text-secondary)' 
+                    <div style={{
+                      display: 'flex',
+                      gap: '1rem',
+                      fontSize: '0.8rem',
+                      color: 'var(--text-secondary)'
                     }}>
                       <span>👀 {video.views} views</span>
                       <span>❤️ {video.likes} likes</span>
                     </div>
-                    
+
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                       {new Date(video.createdAt).toLocaleDateString()}
                     </div>
@@ -399,7 +399,7 @@ function GeneralPage() {
                     >
                       Watch Full Video
                     </button>
-                    
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation()

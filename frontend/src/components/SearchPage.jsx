@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axiosInstance from '../api/axiosInstance'
+import axios from 'axios'
 
 const SearchPage = () => {
     const navigate = useNavigate()
@@ -31,7 +31,7 @@ const SearchPage = () => {
     useEffect(() => {
         const fetchTrending = async () => {
             try {
-                const response = await axiosInstance.get('/api/food/trending')
+                const response = await axios.get('http://localhost:3000/api/food/trending')
                 setTrendingFoods(response.data.data || [])
             } catch (error) {
                 console.error('Error fetching trending:', error)
@@ -79,7 +79,7 @@ const SearchPage = () => {
 
         try {
             setLoading(true)
-            const response = await axiosInstance.get(`/api/food/search`, {
+            const response = await axios.get(`http://localhost:3000/api/food/search`, {
                 params: { q: query, category: category !== 'all' ? category : '' }
             })
             setSearchResults(response.data.data || [])
