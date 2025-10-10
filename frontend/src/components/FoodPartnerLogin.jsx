@@ -1,7 +1,7 @@
 import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState } from 'react'
-import axios from 'axios'
+import axiosInstance from '../api/axiosInstance'
 import { useNavigate } from 'react-router-dom'
 
 function FoodPartnerLogin() {
@@ -70,7 +70,7 @@ function FoodPartnerLogin() {
       }
 
       // API call to login food partner
-      const response = await axios.post('http://localhost:3000/api/auth/foodpartner/login', {
+      const response = await axiosInstance.post('/api/auth/foodpartner/login', {
         email: formData.email,
         password: formData.password
       }, {

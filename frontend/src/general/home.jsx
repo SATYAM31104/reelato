@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axiosInstance from '../api/axiosInstance'
 
 const HomePage = () => {
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
@@ -22,7 +22,7 @@ const HomePage = () => {
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/auth/me', {
+                const response = await axiosInstance.get('/api/auth/me', {
                     withCredentials: true
                 })
                 if (response.data) {
@@ -57,7 +57,7 @@ const HomePage = () => {
         const fetchFoodItems = async () => {
             try {
                 setLoading(true)
-                const response = await axios.get('http://localhost:3000/api/food')
+                const response = await axiosInstance.get('/api/food')
 
                 const transformedVideos = response.data.data.map((item) => ({
                     id: item._id,
@@ -94,7 +94,7 @@ const HomePage = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3000/api/food/like',
+            const response = await axiosInstance.post('/api/food/like',
                 { foodId },
                 { withCredentials: true }
             )
@@ -182,7 +182,7 @@ const HomePage = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3000/api/food/save',
+            const response = await axiosInstance.post('/api/food/save',
                 { foodId },
                 { withCredentials: true }
             )
@@ -219,7 +219,7 @@ const HomePage = () => {
         setShowComments(true)
 
         try {
-            const response = await axios.get(`http://localhost:3000/api/food/comments/${foodId}`)
+            const response = await axiosInstance.get(`/api/food/comments/${foodId}`)
             setComments(prev => ({
                 ...prev,
                 [foodId]: response.data.comments
@@ -234,7 +234,7 @@ const HomePage = () => {
         if (!newComment.trim()) return
 
         try {
-            await axios.post('http://localhost:3000/api/food/comment',
+            await axiosInstance.post('/api/food/comment',
                 { foodId, text: newComment },
                 { withCredentials: true }
             )

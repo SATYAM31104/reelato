@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axiosInstance from '../api/axiosInstance'
 
 const RestaurantStore = () => {
   const { restaurantId } = useParams()
@@ -187,7 +187,7 @@ const RestaurantStore = () => {
         console.log('Fetching data for restaurant ID:', restaurantId)
 
         // Fetch food items for this specific restaurant
-        const foodResponse = await axios.get(`http://localhost:3000/api/food/partner/${restaurantId}`)
+        const foodResponse = await axiosInstance.get(`/api/food/partner/${restaurantId}`)
         console.log('Restaurant food items response:', foodResponse.data)
 
         const restaurantFoodItems = foodResponse.data.data
@@ -203,7 +203,7 @@ const RestaurantStore = () => {
         if (!partnerInfo) {
           console.log('No partner info from food items, fetching directly...')
           try {
-            const partnerResponse = await axios.get(`http://localhost:3000/api/food/partner-info/${restaurantId}`)
+            const partnerResponse = await axiosInstance.get(`/api/food/partner-info/${restaurantId}`)
             console.log('Direct partner info response:', partnerResponse.data)
             partnerInfo = partnerResponse.data.data
           } catch (partnerError) {

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axiosInstance from '../api/axiosInstance'
 import '../styles/createFood.css'
 
 const CreateFood = () => {
@@ -170,7 +170,7 @@ const CreateFood = () => {
       submitData.append('video', formData.video)
 
       // Upload with progress tracking
-      const response = await axios.post('http://localhost:3000/api/food', submitData, {
+      const response = await axiosInstance.post('/api/food', submitData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -276,7 +276,7 @@ const CreateFood = () => {
         <button
           onClick={async () => {
             try {
-              await axios.post('http://localhost:3000/api/auth/logout', {}, {
+              await axiosInstance.post('/api/auth/logout', {}, {
                 withCredentials: true
               })
               navigate('/')

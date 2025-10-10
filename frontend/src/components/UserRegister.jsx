@@ -1,7 +1,7 @@
 import '../styles/auth.css'
 import Shuffle from './Shuffle'
 import { useState } from 'react'
-import axios from 'axios'
+import axiosInstance from '../api/axiosInstance'
 import { useNavigate } from 'react-router-dom'
 
 function UserRegister() {
@@ -72,7 +72,7 @@ function UserRegister() {
       }
 
       // Correct API endpoint for your backend
-      const response = await axios.post("http://localhost:3000/api/auth/user/register", {
+      const response = await axiosInstance.post("/api/auth/user/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password

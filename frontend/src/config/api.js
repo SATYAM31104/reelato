@@ -1,33 +1,26 @@
-// API Configuration
-const API_CONFIG = {
-  development: 'http://localhost:3000',
-  production: '' // Will be same domain on Vercel
-}
-
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? API_CONFIG.production 
-  : API_CONFIG.development
+// API Configuration - Now using centralized axios instance
+// Just define endpoint paths, baseURL is handled by axiosInstance
 
 export const API_ENDPOINTS = {
   // Auth endpoints
-  AUTH_ME: `${API_BASE_URL}/api/auth/me`,
-  USER_LOGIN: `${API_BASE_URL}/api/auth/user/login`,
-  USER_REGISTER: `${API_BASE_URL}/api/auth/user/register`,
-  FOODPARTNER_LOGIN: `${API_BASE_URL}/api/auth/foodpartner/login`,
-  FOODPARTNER_REGISTER: `${API_BASE_URL}/api/auth/foodpartner/register`,
-  LOGOUT: `${API_BASE_URL}/api/auth/logout`,
+  AUTH_ME: '/api/auth/me',
+  USER_LOGIN: '/api/auth/user/login',
+  USER_REGISTER: '/api/auth/user/register',
+  FOODPARTNER_LOGIN: '/api/auth/foodpartner/login',
+  FOODPARTNER_REGISTER: '/api/auth/foodpartner/register',
+  LOGOUT: '/api/auth/logout',
   
   // Food endpoints
-  FOOD_LIST: `${API_BASE_URL}/api/food`,
-  FOOD_LIKE: `${API_BASE_URL}/api/food/like`,
-  FOOD_SAVE: `${API_BASE_URL}/api/food/save`,
-  FOOD_COMMENT: `${API_BASE_URL}/api/food/comment`,
-  FOOD_COMMENTS: (foodId) => `${API_BASE_URL}/api/food/comments/${foodId}`,
-  FOOD_SAVED: `${API_BASE_URL}/api/food/saved`,
-  FOOD_SEARCH: `${API_BASE_URL}/api/food/search`,
-  FOOD_TRENDING: `${API_BASE_URL}/api/food/trending`,
-  FOOD_PARTNER: (partnerId) => `${API_BASE_URL}/api/food/partner/${partnerId}`,
+  FOOD_LIST: '/api/food',
+  FOOD_LIKE: '/api/food/like',
+  FOOD_SAVE: '/api/food/save',
+  FOOD_COMMENT: '/api/food/comment',
+  FOOD_COMMENTS: (foodId) => `/api/food/comments/${foodId}`,
+  FOOD_SAVED: '/api/food/saved',
+  FOOD_SEARCH: '/api/food/search',
+  FOOD_TRENDING: '/api/food/trending',
+  FOOD_PARTNER: (partnerId) => `/api/food/partner/${partnerId}`,
   
   // Test endpoint
-  TEST: `${API_BASE_URL}/api/test`
+  TEST: '/api/test'
 }
