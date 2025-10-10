@@ -1,5 +1,22 @@
 {
+  "name": "reelato",
+  "version": "1.0.0",
+  "description": "Food social media platform",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "setup": "node scripts/setup-production.js",
+    "migrate": "node scripts/migrate-to-atlas.js",
+    "test-atlas": "node scripts/test-atlas.js"
+  },
   "dependencies": {
     "react-router-dom": "^7.9.3"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

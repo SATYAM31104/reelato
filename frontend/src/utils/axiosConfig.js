@@ -2,6 +2,9 @@ import axios from 'axios'
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? '' // Same domain on Vercel
+    : 'http://localhost:3000',
   withCredentials: true,
   timeout: 10000
 })

@@ -8,26 +8,26 @@ async function registerUser(req, res) {
     try {
         console.log('User registration request received:', req.body);
         const { name, email, password } = req.body;
-        
+
         // Validate required fields
         if (!name || !email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
-        
+
         // Check if user already exists
         const isUserExist = await userModel.findOne({ email });
         if (isUserExist) {
             return res.status(400).json({ message: "User already exist" });
         }
-        
+
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         // Create user
-        const user = await userModel.create({ 
-            name, 
-            email, 
-            password: hashedPassword 
+        const user = await userModel.create({
+            name,
+            email,
+            password: hashedPassword
         });
 
         console.log('User created successfully:', user._id);
@@ -36,7 +36,7 @@ async function registerUser(req, res) {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
         // Set cookie and send response
-        res.cookie('token', token, { 
+        res.cookie('token', token, {
             httpOnly: true,
             secure: false, // Set to true in production with HTTPS
             sameSite: 'lax',
@@ -45,10 +45,10 @@ async function registerUser(req, res) {
         console.log('Cookie set for user:', user._id);
         res.status(201).json({
             message: "User registered successfully",
-            user: { 
+            user: {
                 id: user._id,
-                name: user.name, 
-                email: user.email 
+                name: user.name,
+                email: user.email
             }
         });
     } catch (error) {
@@ -68,7 +68,7 @@ async function loginUser(req, res) {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie('token', token, { 
+        res.cookie('token', token, {
             httpOnly: true,
             secure: false, // Set to true in production with HTTPS
             sameSite: 'lax',
@@ -82,7 +82,7 @@ async function loginUser(req, res) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 }
- function logoutUser(req, res) {
+function logoutUser(req, res) {
     try {
         res.clearCookie('token');
         res.status(200).json({ message: "User logged out successfully" });
@@ -109,7 +109,7 @@ async function registerFoodPartner(req, res) {
             address
         });
         const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie('token', token, { 
+        res.cookie('token', token, {
             httpOnly: true,
             secure: false, // Set to true in production with HTTPS
             sameSite: 'lax',
@@ -117,10 +117,10 @@ async function registerFoodPartner(req, res) {
         });
         res.status(201).json({
             message: "Food Partner registered successfully",
-            foodPartner: { 
-                restaurantName: foodPartner.restaurantName, 
-                ownerName: foodPartner.ownerName, 
-                email: foodPartner.email 
+            foodPartner: {
+                restaurantName: foodPartner.restaurantName,
+                ownerName: foodPartner.ownerName,
+                email: foodPartner.email
             }
         });
     } catch (error) {
@@ -140,7 +140,7 @@ async function loginFoodPartner(req, res) {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
         const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        res.cookie('token', token, { 
+        res.cookie('token', token, {
             httpOnly: true,
             secure: false, // Set to true in production with HTTPS
             sameSite: 'lax',
@@ -149,10 +149,10 @@ async function loginFoodPartner(req, res) {
         console.log('Cookie set for food partner:', foodPartner._id);
         res.status(200).json({
             message: "Food Partner logged in successfully",
-            foodPartner: { 
-                restaurantName: foodPartner.restaurantName, 
-                ownerName: foodPartner.ownerName, 
-                email: foodPartner.email 
+            foodPartner: {
+                restaurantName: foodPartner.restaurantName,
+                ownerName: foodPartner.ownerName,
+                email: foodPartner.email
             }
         });
     } catch (error) {
@@ -189,7 +189,7 @@ async function getMe(req, res) {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Try to find user first
         let user = await userModel.findById(decoded.id).select('-password');
         if (user) {
@@ -223,4 +223,4 @@ async function getMe(req, res) {
     }
 }
 
-module.exports = { registerUser, loginUser, logoutUser, registerFoodPartner, loginFoodPartner, logoutFoodPartner, logout, getMe};
+module.exports = { registerUser, loginUser, logoutUser, registerFoodPartner, loginFoodPartner, logoutFoodPartner, logout, getMe };
