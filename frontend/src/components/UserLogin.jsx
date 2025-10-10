@@ -70,9 +70,9 @@ function UserLogin() {
         password: ''
       });
 
-      // Redirect to general feed page after 1 second
+      // Redirect to feed page after 1 second
       setTimeout(() => {
-        navigate("/general");
+        navigate("/feed");
       }, 1000);
 
     } catch (error) {

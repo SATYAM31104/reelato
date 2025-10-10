@@ -100,7 +100,6 @@ function FoodPartnerRegister() {
       });
 
       console.log('Food Partner registration successful:', response.data);
-      navigate("/create-food");
 
       // Set success state and partner data
       setSuccess(true);

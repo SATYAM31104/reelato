@@ -8,7 +8,32 @@ function GeneralPage() {
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const navigate = useNavigate()
+
+  // Check authentication status
+  const [userType, setUserType] = useState(null) // 'user' or 'foodPartner'
+  
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        // Try to get user info to check if logged in
+        const response = await axios.get('http://localhost:3000/api/auth/me', {
+          withCredentials: true
+        })
+        if (response.data) {
+          setIsLoggedIn(true)
+          setUserType(response.data.type) // 'user' or 'foodPartner'
+        }
+      } catch (error) {
+        // User not logged in, that's fine
+        setIsLoggedIn(false)
+        setUserType(null)
+      }
+    }
+
+    checkAuthStatus()
+  }, [])
 
   // Fetch food items from backend
   useEffect(() => {
@@ -72,9 +97,50 @@ function GeneralPage() {
             <a href="/" style={{ color: 'var(--text-color)', textDecoration: 'none' }}>Home</a>
             <a href="/general" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}>Browse</a>
             <a href="/feed" style={{ color: 'var(--text-color)', textDecoration: 'none' }}>Full Feed</a>
+            
+            {/* Food Partner Upload Option */}
+            {isLoggedIn && userType === 'foodPartner' && (
+              <a 
+                href="/create-food" 
+                style={{ 
+                  color: '#ff6b6b', 
+                  textDecoration: 'none', 
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                🍽️ Upload Your Own Food
+              </a>
+            )}
+            
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <a href="/user/login" className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Login</a>
-              <a href="/user/register" className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Sign Up</a>
+              {isLoggedIn ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      await axios.post('http://localhost:3000/api/auth/logout', {}, {
+                        withCredentials: true
+                      })
+                      setIsLoggedIn(false)
+                      setUserType(null)
+                      navigate('/')
+                    } catch (error) {
+                      console.error('Logout error:', error)
+                    }
+                  }}
+                  className="btn-secondary"
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                >
+                  Logout
+                </button>
+              ) : (
+                <>
+                  <a href="/user/login" className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Login</a>
+                  <a href="/user/register" className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Sign Up</a>
+                </>
+              )}
             </div>
           </nav>
         </div>

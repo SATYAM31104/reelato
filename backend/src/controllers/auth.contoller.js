@@ -168,4 +168,59 @@ function logoutFoodPartner(req, res) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 }
-module.exports = { registerUser, loginUser, logoutUser, registerFoodPartner,loginFoodPartner,logoutFoodPartner}; //aaise export kar rahe because aur bhi saaare function likhne hain
+
+// General logout endpoint
+function logout(req, res) {
+    try {
+        res.clearCookie('token');
+        res.status(200).json({ message: "Logged out successfully" });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+}
+
+// Check authentication status
+async function getMe(req, res) {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Try to find user first
+        let user = await userModel.findById(decoded.id).select('-password');
+        if (user) {
+            return res.status(200).json({
+                type: 'user',
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email
+                }
+            });
+        }
+
+        // If not user, try food partner
+        let foodPartner = await foodPartnerModel.findById(decoded.id).select('-password');
+        if (foodPartner) {
+            return res.status(200).json({
+                type: 'foodPartner',
+                foodPartner: {
+                    id: foodPartner._id,
+                    restaurantName: foodPartner.restaurantName,
+                    ownerName: foodPartner.ownerName,
+                    email: foodPartner.email
+                }
+            });
+        }
+
+        return res.status(401).json({ message: "User not found" });
+    } catch (error) {
+        return res.status(401).json({ message: "Invalid token" });
+    }
+}
+
+module.exports = { registerUser, loginUser, logoutUser, registerFoodPartner, loginFoodPartner, logoutFoodPartner, logout, getMe};

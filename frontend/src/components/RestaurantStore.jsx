@@ -8,7 +8,6 @@ const RestaurantStore = () => {
   const [restaurant, setRestaurant] = useState(null)
   const [foodItems, setFoodItems] = useState([])
   const [loading, setLoading] = useState(true)
-
   // Mock restaurant data - replace with real API call later
   const mockRestaurants = {
     'mario-pizzeria': {
@@ -186,20 +185,20 @@ const RestaurantStore = () => {
       try {
         setLoading(true)
         console.log('Fetching data for restaurant ID:', restaurantId)
-        
+
         // Fetch food items for this specific restaurant
         const foodResponse = await axios.get(`http://localhost:3000/api/food/partner/${restaurantId}`)
         console.log('Restaurant food items response:', foodResponse.data)
-        
+
         const restaurantFoodItems = foodResponse.data.data
-        
+
         console.log('Restaurant food items:', restaurantFoodItems)
-        
+
         console.log('Food items count:', restaurantFoodItems.length)
         console.log('Partner info from food items:', foodResponse.data.partner)
-        
+
         let partnerInfo = foodResponse.data.partner || restaurantFoodItems[0]?.foodPartner
-        
+
         // If no partner info from food items, try to fetch partner info directly
         if (!partnerInfo) {
           console.log('No partner info from food items, fetching directly...')
@@ -211,9 +210,9 @@ const RestaurantStore = () => {
             console.error('Error fetching partner info directly:', partnerError)
           }
         }
-        
+
         console.log('Final partner info:', partnerInfo)
-        
+
         if (partnerInfo) {
           const restaurantInfo = {
             id: restaurantId,
@@ -227,7 +226,7 @@ const RestaurantStore = () => {
             rating: 4.8,
             totalReviews: Math.floor(Math.random() * 500) + 50
           }
-          
+
           // Transform food items
           const transformedFoodItems = restaurantFoodItems.map(item => ({
             id: item._id,
@@ -239,7 +238,7 @@ const RestaurantStore = () => {
             isAvailable: true,
             createdAt: item.createdAt
           }))
-          
+
           console.log('Setting restaurant info:', restaurantInfo)
           setRestaurant(restaurantInfo)
           setFoodItems(transformedFoodItems)
@@ -249,7 +248,7 @@ const RestaurantStore = () => {
           setRestaurant(null)
           setFoodItems([])
         }
-        
+
       } catch (error) {
         console.error('Error fetching restaurant data:', error)
         setRestaurant(null)
@@ -375,14 +374,33 @@ const RestaurantStore = () => {
             gap: '2rem',
             alignItems: 'center'
           }}>
-            <img
+            <video
               src={restaurant.image}
-              alt={restaurant.name}
+              controls
+              muted
+              loop
               style={{
                 width: '100%',
                 height: '200px',
                 objectFit: 'cover',
                 borderRadius: '8px'
+              }}
+              onError={(e) => {
+                // Fallback to placeholder if video fails to load
+                e.target.style.display = 'none'
+                const fallbackDiv = document.createElement('div')
+                fallbackDiv.style.cssText = `
+                  width: 100%;
+                  height: 200px;
+                  background: linear-gradient(135deg, #ff6b6b, #feca57);
+                  border-radius: 8px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 3rem;
+                `
+                fallbackDiv.innerHTML = '🍽️'
+                e.target.parentNode.insertBefore(fallbackDiv, e.target)
               }}
             />
             <div>
@@ -418,7 +436,7 @@ const RestaurantStore = () => {
           <h3 style={{ color: '#333', marginBottom: '1.5rem', fontSize: '24px' }}>
             Menu Items ({foodItems.length})
           </h3>
-          
+
           {foodItems.length === 0 ? (
             <div style={{
               backgroundColor: 'white',
@@ -457,15 +475,73 @@ const RestaurantStore = () => {
                     e.currentTarget.style.transform = 'translateY(0)'
                   }}
                 >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: '100%',
-                      height: '200px',
-                      objectFit: 'cover'
+                  <div style={{ position: 'relative' }}>
+                    <video
+                      src={item.image}
+                      muted
+                      loop
+                      style={{
+                        width: '100%',
+                        height: '200px',
+                        objectFit: 'cover'
+                      }}
+                      onMouseEnter={(e) => e.target.play()}
+                      onMouseLeave={(e) => e.target.pause()}
+                      onError={(e) => {
+                        // Fallback to gradient background if video fails
+                        e.target.style.display = 'none'
+                        e.target.parentElement.style.background = `linear-gradient(135deg, #ff6b6b, #feca57)`
+                        e.target.parentElement.innerHTML += `
+                          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem;">
+                            🍽️
+                          </div>
+                        `
+                      }}
+                    />
+
+                    {/* Play Button Overlay */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                      borderRadius: '50%',
+                      width: '50px',
+                      height: '50px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      fontSize: '1.2rem',
+                      color: 'white',
+                      cursor: 'pointer',
+                      opacity: 0.8,
+                      transition: 'opacity 0.3s ease'
                     }}
-                  />
+                      onMouseEnter={(e) => {
+                        e.target.style.opacity = '1'
+                        const video = e.target.parentElement.querySelector('video')
+                        if (video) video.play()
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.opacity = '0.8'
+                        const video = e.target.parentElement.querySelector('video')
+                        if (video) video.pause()
+                      }}
+                      onClick={(e) => {
+                        const video = e.target.parentElement.querySelector('video')
+                        if (video) {
+                          if (video.paused) {
+                            video.play()
+                          } else {
+                            video.pause()
+                          }
+                        }
+                      }}
+                    >
+                      ▶️
+                    </div>
+                  </div>
                   <div style={{ padding: '1.5rem' }}>
                     <div style={{
                       display: 'flex',
