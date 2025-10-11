@@ -26,7 +26,14 @@ async function authFoodPartnerMiddleware(req, res, next) {
 async function authuserMiddleware(req, res, next) {
     try {
         const token = req.cookies.token;
+        
+        // Debug logging for mobile issues
+        console.log('Auth middleware - Cookies received:', Object.keys(req.cookies));
+        console.log('Auth middleware - Token present:', !!token);
+        console.log('Auth middleware - User-Agent:', req.get('User-Agent')?.substring(0, 50));
+        
         if (!token) {
+            console.log('Auth middleware - No token found, rejecting request');
             return res.status(401).json({ message: "Please Login First" });
         }
 

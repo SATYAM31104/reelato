@@ -36,8 +36,19 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+    exposedHeaders: ['Set-Cookie']
 }));
+
+// Additional middleware for mobile compatibility
+app.use((req, res, next) => {
+    // Add headers for mobile cookie support
+    if (process.env.NODE_ENV === 'production') {
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Vary', 'Origin');
+    }
+    next();
+});
 
 // Middleware to parse JSON
 app.use(express.json());

@@ -40,7 +40,15 @@ async function registerUser(req, res) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
+        });
+        
+        // Debug logging for mobile issues
+        console.log('Setting cookie for:', process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT');
+        console.log('Cookie settings:', {
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
         console.log('Cookie set for user:', user._id);
         res.status(201).json({
@@ -72,7 +80,15 @@ async function loginUser(req, res) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
+        });
+        
+        // Debug logging for mobile issues
+        console.log('Setting cookie for:', process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT');
+        console.log('Cookie settings:', {
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
         res.status(200).json({
             message: "User logged in successfully",
@@ -113,7 +129,15 @@ async function registerFoodPartner(req, res) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
+        });
+        
+        // Debug logging for mobile issues
+        console.log('Setting cookie for:', process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT');
+        console.log('Cookie settings:', {
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
         res.status(201).json({
             message: "Food Partner registered successfully",
@@ -144,7 +168,15 @@ async function loginFoodPartner(req, res) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
+        });
+        
+        // Debug logging for mobile issues
+        console.log('Setting cookie for:', process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'DEVELOPMENT');
+        console.log('Cookie settings:', {
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         });
         console.log('Cookie set for food partner:', foodPartner._id);
         res.status(200).json({
