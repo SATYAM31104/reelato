@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createAuthenticatedAxios, { logoutWithMobileSupport } from '../utils/mobileAuth'
+import createAuthenticatedAxios, { logoutWithMobileSupport, getAuthState, setAuthState } from '../utils/mobileAuth'
 
 const SavedVideos = () => {
     const navigate = useNavigate()
@@ -12,35 +12,17 @@ const SavedVideos = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userType, setUserType] = useState(null)
 
-    // Check authentication status (mobile-friendly)
+    // Check authentication status (mobile-first, no server calls)
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            // First check localStorage for quick auth state (mobile-friendly)
-            const storedAuth = localStorage.getItem('isLoggedIn')
-            const storedUserType = localStorage.getItem('userType')
-            
-            if (storedAuth === 'true' && storedUserType) {
-                setIsLoggedIn(true)
-                setUserType(storedUserType)
-                return // Don't make server call if we have stored auth
-            }
-            
-            // If no stored auth, check with server
-            try {
-                const authAxios = createAuthenticatedAxios()
-                const response = await authAxios.get('/api/auth/me')
-                if (response.data) {
-                    setIsLoggedIn(true)
-                    setUserType(response.data.type)
-                    localStorage.setItem('isLoggedIn', 'true')
-                    localStorage.setItem('userType', response.data.type)
-                }
-            } catch (error) {
-                setIsLoggedIn(false)
-                setUserType(null)
-                localStorage.removeItem('isLoggedIn')
-                localStorage.removeItem('userType')
-                localStorage.removeItem('authToken')
+        // Use the global auth state - no server verification to prevent logout
+        const authState = getAuthState()
+        setIsLoggedIn(authState.isLoggedIn)
+        setUserType(authState.userType)
+        
+        // If not logged in, redirect immediately without server check
+        if (!authState.isLoggedIn) {
+            navigate('/')
+            return
                     navigate('/')
                 }
             }

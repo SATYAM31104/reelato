@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createAuthenticatedAxios, { logoutWithMobileSupport } from '../utils/mobileAuth'
+import createAuthenticatedAxios, { logoutWithMobileSupport, getAuthState, setAuthState } from '../utils/mobileAuth'
 
 function GeneralPage() {
   const [videos, setVideos] = useState([])
@@ -17,55 +17,31 @@ function GeneralPage() {
   const [userType, setUserType] = useState(null) // 'user' or 'foodPartner'
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      // First check localStorage for quick auth state (mobile-friendly)
-      const storedAuth = localStorage.getItem('isLoggedIn')
-      const storedUserType = localStorage.getItem('userType')
-      
-      if (storedAuth === 'true' && storedUserType) {
-        setIsLoggedIn(true)
-        setUserType(storedUserType)
-        
-        // Verify with server in background (don't block UI)
-        setTimeout(async () => {
-          try {
-            const authAxios = createAuthenticatedAxios()
-            await authAxios.get('/api/auth/me')
-          } catch (error) {
-            // Only clear auth if server explicitly rejects
-            if (error.response?.status === 401) {
-              setIsLoggedIn(false)
-              setUserType(null)
-              localStorage.removeItem('isLoggedIn')
-              localStorage.removeItem('userType')
-              localStorage.removeItem('authToken')
-            }
+    // Use the global auth state (mobile-first approach)
+    const authState = getAuthState()
+    setIsLoggedIn(authState.isLoggedIn)
+    setUserType(authState.userType)
+    
+    // Only verify with server if we don't have auth state and it's been a while
+    const shouldVerify = !authState.isLoggedIn && (Date.now() - authState.lastCheck > 60000) // 1 minute
+    
+    if (shouldVerify) {
+      // Background verification (don't block UI or cause logout)
+      setTimeout(async () => {
+        try {
+          const authAxios = createAuthenticatedAxios()
+          const response = await authAxios.get('/api/auth/me')
+          if (response.data) {
+            setAuthState(true, response.data.type)
+            setIsLoggedIn(true)
+            setUserType(response.data.type)
           }
-        }, 1000)
-        
-        return
-      }
-      
-      // If no stored auth, check with server
-      try {
-        const authAxios = createAuthenticatedAxios()
-        const response = await authAxios.get('/api/auth/me')
-        if (response.data) {
-          setIsLoggedIn(true)
-          setUserType(response.data.type)
-          localStorage.setItem('isLoggedIn', 'true')
-          localStorage.setItem('userType', response.data.type)
+        } catch (error) {
+          // Don't clear auth on network errors, only on explicit auth failures
+          console.log('Background auth check failed, but not clearing state')
         }
-      } catch (error) {
-        setIsLoggedIn(false)
-        setUserType(null)
-        localStorage.removeItem('isLoggedIn')
-        localStorage.removeItem('userType')
-        localStorage.removeItem('authToken')
-      }
+      }, 2000)
     }
-
-    checkAuthStatus()
   }, [])
 
   // Fetch food items from backend

@@ -7,6 +7,55 @@ const isMobile = () => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
 
+// Global auth state management
+let globalAuthState = {
+  isLoggedIn: false,
+  userType: null,
+  lastCheck: 0
+}
+
+// Initialize auth state from localStorage
+const initAuthState = () => {
+  const storedAuth = localStorage.getItem('isLoggedIn')
+  const storedUserType = localStorage.getItem('userType')
+  
+  if (storedAuth === 'true' && storedUserType) {
+    globalAuthState = {
+      isLoggedIn: true,
+      userType: storedUserType,
+      lastCheck: Date.now()
+    }
+  }
+}
+
+// Get current auth state (mobile-first)
+export const getAuthState = () => {
+  // Initialize if not done
+  if (globalAuthState.lastCheck === 0) {
+    initAuthState()
+  }
+  
+  return globalAuthState
+}
+
+// Set auth state
+export const setAuthState = (isLoggedIn, userType = null) => {
+  globalAuthState = {
+    isLoggedIn,
+    userType,
+    lastCheck: Date.now()
+  }
+  
+  if (isLoggedIn) {
+    localStorage.setItem('isLoggedIn', 'true')
+    localStorage.setItem('userType', userType)
+  } else {
+    localStorage.removeItem('isLoggedIn')
+    localStorage.removeItem('userType')
+    localStorage.removeItem('authToken')
+  }
+}
+
 // Create axios instance with mobile auth support
 const createAuthenticatedAxios = () => {
   const instance = axios.create({
@@ -18,12 +67,10 @@ const createAuthenticatedAxios = () => {
   // Add request interceptor to include token in headers for mobile
   instance.interceptors.request.use(
     (config) => {
-      // If mobile, try to get token from localStorage and add to headers
-      if (isMobile()) {
-        const token = localStorage.getItem('authToken')
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
+      // Always try to get token from localStorage and add to headers
+      const token = localStorage.getItem('authToken')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
       }
       return config
     },
@@ -32,18 +79,17 @@ const createAuthenticatedAxios = () => {
     }
   )
 
-  // Add response interceptor for auth errors
+  // Add response interceptor for auth errors (less aggressive)
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response?.status === 401) {
-        // Clear auth state
-        localStorage.removeItem('authToken')
-        localStorage.removeItem('isLoggedIn')
-        localStorage.removeItem('userType')
+      // Only clear auth on explicit authentication failures, not network errors
+      if (error.response?.status === 401 && error.response?.data?.message?.includes('Login')) {
+        console.log('Authentication failed, clearing auth state')
+        setAuthState(false)
         
-        // Redirect to login if not already there
-        if (window.location.pathname !== '/') {
+        // Only redirect if not already on login page
+        if (!window.location.pathname.includes('login') && window.location.pathname !== '/') {
           window.location.href = '/'
         }
       }
@@ -61,11 +107,11 @@ export const loginWithMobileSupport = async (endpoint, credentials) => {
       withCredentials: true
     })
 
-    // If login successful and we have a token, store it for mobile
-    if (response.data.token && isMobile()) {
+    // If login successful, store auth state
+    if (response.data.token) {
       localStorage.setItem('authToken', response.data.token)
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('userType', response.data.user ? 'user' : 'foodPartner')
+      const userType = response.data.user ? 'user' : 'foodPartner'
+      setAuthState(true, userType)
     }
 
     return response
@@ -83,10 +129,8 @@ export const logoutWithMobileSupport = async () => {
   } catch (error) {
     console.error('Logout error:', error)
   } finally {
-    // Always clear local storage
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('isLoggedIn')
-    localStorage.removeItem('userType')
+    // Clear global auth state
+    setAuthState(false)
   }
 }
 
