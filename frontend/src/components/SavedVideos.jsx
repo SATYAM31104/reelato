@@ -523,17 +523,7 @@ const SavedVideos = () => {
                 </button>
 
                 <button
-                    onClick={async () => {
-                        try {
-                            logout()
-                            setUserType(null)
-                            localStorage.removeItem('isLoggedIn')
-                            localStorage.removeItem('userType')
-                            navigate('/')
-                        } catch (error) {
-                            console.error('Logout error:', error)
-                        }
-                    }}
+                    onClick={() => navigate('/profile')}
                     style={{
                         background: 'none',
                         border: 'none',
