@@ -1,12 +1,13 @@
 import axios from 'axios'
 
+// Use environment variable for API URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://reelato-backend.onrender.com'
+
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? '' // Same domain on Vercel
-    : 'http://localhost:3000',
+  baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 10000
+  timeout: 15000 // Increased for Render cold starts
 })
 
 // Response interceptor to handle 401 errors globally

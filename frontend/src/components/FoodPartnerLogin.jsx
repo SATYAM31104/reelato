@@ -3,6 +3,7 @@ import Shuffle from './Shuffle'
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/api'
 
 function FoodPartnerLogin() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ function FoodPartnerLogin() {
       }
 
       // API call to login food partner
-      const response = await axios.post('http://localhost:3000/api/auth/foodpartner/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/foodpartner/login`, {
         email: formData.email,
         password: formData.password
       }, {

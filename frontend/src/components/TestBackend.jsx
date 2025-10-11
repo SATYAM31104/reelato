@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 
 function TestBackend() {
     const [result, setResult] = useState('')
@@ -8,7 +9,7 @@ function TestBackend() {
     const testConnection = async () => {
         setLoading(true)
         try {
-            const response = await axios.get('http://localhost:3000/api/test')
+            const response = await axios.get(`${API_BASE_URL}/api/test`)
             setResult(`✅ Backend connected! Response: ${JSON.stringify(response.data)}`)
         } catch (error) {
             setResult(`❌ Backend connection failed: ${error.message}`)
@@ -19,7 +20,7 @@ function TestBackend() {
     const testRegistration = async () => {
         setLoading(true)
         try {
-            const response = await axios.post('http://localhost:3000/api/auth/user/register', {
+            const response = await axios.post(`${API_BASE_URL}/api/auth/user/register`, {
                 name: 'Test User',
                 email: `test${Date.now()}@example.com`,
                 password: 'password123'

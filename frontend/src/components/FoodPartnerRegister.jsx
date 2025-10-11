@@ -3,6 +3,7 @@ import Shuffle from './Shuffle'
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/api'
 
 function FoodPartnerRegister() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ function FoodPartnerRegister() {
       }
 
       // API call to register food partner
-      const response = await axios.post('http://localhost:3000/api/auth/foodpartner/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/foodpartner/register`, {
         restaurantName: formData.restaurantName,
         ownerName: formData.ownerName,
         email: formData.email,

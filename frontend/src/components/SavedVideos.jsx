@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 
 const SavedVideos = () => {
     const navigate = useNavigate()
@@ -14,7 +15,7 @@ const SavedVideos = () => {
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/auth/me', {
+                const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
                     withCredentials: true
                 })
                 if (response.data) {
@@ -54,7 +55,7 @@ const SavedVideos = () => {
                 console.log('User logged in:', isLoggedIn)
                 console.log('User type:', userType)
                 
-                const response = await axios.get('http://localhost:3000/api/food/saved', {
+                const response = await axios.get(`${API_BASE_URL}/api/food/saved`, {
                     withCredentials: true
                 })
                 
@@ -90,7 +91,7 @@ const SavedVideos = () => {
     // Handle unsave
     const handleUnsave = async (foodId) => {
         try {
-            await axios.post('http://localhost:3000/api/food/save', 
+            await axios.post(`${API_BASE_URL}/api/food/save`, 
                 { foodId }, 
                 { withCredentials: true }
             )
@@ -221,7 +222,7 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const response = await axios.get('http://localhost:3000/api/food/test-auth', {
+                                        const response = await axios.get(`${API_BASE_URL}/api/food/test-auth`, {
                                             withCredentials: true
                                         })
                                         console.log('Auth test response:', response.data)
@@ -247,7 +248,7 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const response = await axios.get('http://localhost:3000/api/food/saved-simple', {
+                                        const response = await axios.get(`${API_BASE_URL}/api/food/saved-simple`, {
                                             withCredentials: true
                                         })
                                         console.log('Simple saved test response:', response.data)
@@ -550,7 +551,7 @@ const SavedVideos = () => {
                 <button
                     onClick={async () => {
                         try {
-                            await axios.post('http://localhost:3000/api/auth/logout', {}, {
+                            await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
                                 withCredentials: true
                             })
                             setIsLoggedIn(false)

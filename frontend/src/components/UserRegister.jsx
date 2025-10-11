@@ -3,6 +3,7 @@ import Shuffle from './Shuffle'
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/api'
 
 function UserRegister() {
 
@@ -72,7 +73,7 @@ function UserRegister() {
       }
 
       // Correct API endpoint for your backend
-      const response = await axios.post('http://localhost:3000/api/auth/user/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/user/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password

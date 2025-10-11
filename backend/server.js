@@ -1,48 +1,65 @@
+// server.js
 const express = require('express');
-const cookieparser = require('cookie-parser');
+const cookieParser = require('cookie-parser'); // fixed typo
 const dotenv = require('dotenv');
-const authRoutes = require("./src/routes/auth.routes")
-const foodRoutes = require('./src/routes/food.routes')
-const cors = require('cors')
+const cors = require('cors');
+const authRoutes = require('./src/routes/auth.routes');
+const foodRoutes = require('./src/routes/food.routes');
 
 // Load environment variables
 dotenv.config({ path: './.env' });
 
 const app = express();
-app.use(cookieparser());
+app.use(cookieParser());
 
-// CORS configuration for Vercel deployment
+// CORS configuration
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? [process.env.FRONTEND_URL, 'https://your-app-name.vercel.app'] 
-        : ["http://localhost:5173", "http://localhost:3000"],
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like Postman, mobile apps)
+        if (!origin) return callback(null, true);
+        
+        // In production, allow Vercel domains and specific frontend URL
+        if (process.env.NODE_ENV === 'production') {
+            if (origin.endsWith('.vercel.app') || origin === process.env.FRONTEND_URL) {
+                return callback(null, true);
+            }
+            return callback(new Error('CORS policy blocked this origin'), false);
+        }
+        
+        // In development, allow localhost
+        const allowedLocalOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+        if (allowedLocalOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        
+        return callback(new Error('CORS policy blocked this origin'), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
-// Middleware
-app.use(express.json()); // this is used to help fetch and read data from req.body 
+// Middleware to parse JSON
+app.use(express.json());
 
 // Database connection
-const { connectDB } = require("./src/db/db");
+const { connectDB } = require('./src/db/db');
 connectDB();
 
-// Routes
-app.get("/", (req, res) => {
-    res.send(`<h1>Reelato API is running!</h1>`);
-});
-
 // Test route
-app.get("/api/test", (req, res) => {
-    res.json({ message: "Backend is working!", timestamp: new Date().toISOString() });
+app.get('/', (req, res) => {
+    res.send('<h1>Reelato API is running!</h1>');
 });
 
-// API routes mounting
-app.use("/api/auth", authRoutes);
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Backend is working!', timestamp: new Date().toISOString() });
+});
+
+// API routes
+app.use('/api/auth', authRoutes);
 app.use('/api/food', foodRoutes);
 
-// For Vercel serverless functions
+// Start server only in local development
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {

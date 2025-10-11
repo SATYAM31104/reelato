@@ -1,12 +1,7 @@
-// API Configuration
-const API_CONFIG = {
-  development: 'http://localhost:3000',
-  production: '' // Will be same domain on Vercel
-}
+// API Configuration - Works for both local development and production
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://reelato-backend.onrender.com'
 
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? API_CONFIG.production 
-  : API_CONFIG.development
+export { API_BASE_URL }
 
 export const API_ENDPOINTS = {
   // Auth endpoints
