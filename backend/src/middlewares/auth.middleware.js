@@ -32,13 +32,25 @@ async function authuserMiddleware(req, res, next) {
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.findById(decoded.id);
-        if (!user) {
-            return res.status(401).json({ message: "Unauthorized" });
+        
+        // Try to find user first
+        let user = await userModel.findById(decoded.id);
+        if (user) {
+            req.user = user;
+            req.userType = 'user';
+            return next();
         }
 
-        req.user = user;
-        next();
+        // If not user, try food partner
+        const foodPartnerModel = require("../models/foodpartner.model");
+        let foodPartner = await foodPartnerModel.findById(decoded.id);
+        if (foodPartner) {
+            req.user = foodPartner;
+            req.userType = 'foodPartner';
+            return next();
+        }
+
+        return res.status(401).json({ message: "Unauthorized" });
     } catch (error) {
         console.error("Auth middleware error:", error);
         return res.status(401).json({ message: "Unauthorized" });

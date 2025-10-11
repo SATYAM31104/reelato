@@ -183,16 +183,11 @@ function logout(req, res) {
 // Check authentication status
 async function getMe(req, res) {
     try {
-        const token = req.cookies.token;
-        if (!token) {
-            return res.status(401).json({ message: "Not authenticated" });
-        }
+        // User data is already available from middleware
+        const user = req.user;
+        const userType = req.userType;
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Try to find user first
-        let user = await userModel.findById(decoded.id).select('-password');
-        if (user) {
+        if (userType === 'user') {
             return res.status(200).json({
                 type: 'user',
                 user: {
@@ -201,25 +196,22 @@ async function getMe(req, res) {
                     email: user.email
                 }
             });
-        }
-
-        // If not user, try food partner
-        let foodPartner = await foodPartnerModel.findById(decoded.id).select('-password');
-        if (foodPartner) {
+        } else if (userType === 'foodPartner') {
             return res.status(200).json({
                 type: 'foodPartner',
                 foodPartner: {
-                    id: foodPartner._id,
-                    restaurantName: foodPartner.restaurantName,
-                    ownerName: foodPartner.ownerName,
-                    email: foodPartner.email
+                    id: user._id,
+                    restaurantName: user.restaurantName,
+                    ownerName: user.ownerName,
+                    email: user.email
                 }
             });
         }
 
-        return res.status(401).json({ message: "User not found" });
+        return res.status(401).json({ message: "Invalid user type" });
     } catch (error) {
-        return res.status(401).json({ message: "Invalid token" });
+        console.error("GetMe error:", error);
+        return res.status(401).json({ message: "Authentication error" });
     }
 }
 

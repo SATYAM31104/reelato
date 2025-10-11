@@ -13,6 +13,6 @@ router.get('/foodpartner/logout', authController.logoutFoodPartner)
 
 // General auth endpoints
 router.post('/logout', authController.logout)
-router.get('/me', authController.getMe)
+router.get('/me', authuserMiddleware, authController.getMe)
 
 module.exports = router;
