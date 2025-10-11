@@ -33,14 +33,39 @@ initAuth()
 
 // Get current auth state
 export const isAuthenticated = () => {
+  // Always check localStorage as well for reliability
+  const storedAuth = localStorage.getItem('isLoggedIn')
+  const storedToken = localStorage.getItem('authToken')
+  
+  if (storedAuth === 'true' && storedToken && !window.authState.isLoggedIn) {
+    // Restore auth state from localStorage
+    initAuth()
+  }
+  
   return window.authState.isLoggedIn
 }
 
 export const getUserType = () => {
+  // Always check localStorage as well for reliability
+  const storedUserType = localStorage.getItem('userType')
+  
+  if (storedUserType && !window.authState.userType) {
+    // Restore auth state from localStorage
+    initAuth()
+  }
+  
   return window.authState.userType
 }
 
 export const getToken = () => {
+  // Always check localStorage as well for reliability
+  const storedToken = localStorage.getItem('authToken')
+  
+  if (storedToken && !window.authState.token) {
+    // Restore auth state from localStorage
+    initAuth()
+  }
+  
   return window.authState.token
 }
 
@@ -90,13 +115,52 @@ export const login = async (endpoint, credentials) => {
     })
     
     if (response.data.token) {
+      // Determine user type based on response structure
       const userType = response.data.user ? 'user' : 'foodPartner'
       setAuthState(true, userType, response.data.token)
+      
+      console.log('Login successful - Auth state set:', {
+        isLoggedIn: true,
+        userType: userType,
+        hasToken: !!response.data.token
+      })
     }
     
     return response
   } catch (error) {
     throw error
+  }
+}
+
+// Verify authentication with backend
+export const verifyAuth = async () => {
+  try {
+    const authAxios = createAuthAxios()
+    const response = await authAxios.get('/api/auth/me')
+    
+    if (response.data) {
+      const userType = response.data.type
+      const userData = response.data.user || response.data.foodPartner
+      
+      // Update auth state with verified data
+      setAuthState(true, userType, getToken())
+      
+      console.log('Auth verification successful:', {
+        userType: userType,
+        userData: userData
+      })
+      
+      return true
+    }
+  } catch (error) {
+    console.log('Auth verification failed:', error.response?.status)
+    
+    // If 401, clear auth state
+    if (error.response?.status === 401) {
+      setAuthState(false)
+    }
+    
+    return false
   }
 }
 

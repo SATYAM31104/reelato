@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createAuthAxios, { isAuthenticated, getUserType } from '../utils/reliableAuth'
+import createAuthAxios, { isAuthenticated, getUserType, verifyAuth } from '../utils/reliableAuth'
 
 const HomePage = () => {
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
@@ -22,9 +22,19 @@ const HomePage = () => {
 
     // Check authentication status
     useEffect(() => {
-        const checkAuthStatus = () => {
+        const checkAuthStatus = async () => {
+            // First check local state
             setIsLoggedIn(isAuthenticated())
             setUserType(getUserType())
+            
+            // Then verify with backend if we think we're logged in
+            if (isAuthenticated()) {
+                const isValid = await verifyAuth()
+                if (!isValid) {
+                    setIsLoggedIn(false)
+                    setUserType(null)
+                }
+            }
         }
         checkAuthStatus()
     }, [])

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createAuthAxios, { isAuthenticated, getUserType, logout } from '../utils/reliableAuth'
+import createAuthAxios, { isAuthenticated, getUserType, logout, verifyAuth } from '../utils/reliableAuth'
 
 const SavedVideos = () => {
     const navigate = useNavigate()
@@ -14,13 +14,25 @@ const SavedVideos = () => {
 
     // Simple auth check
     useEffect(() => {
-        setIsLoggedIn(isAuthenticated())
-        setUserType(getUserType())
-        
-        if (!isAuthenticated()) {
-            navigate('/')
-            return
+        const checkAuth = async () => {
+            setIsLoggedIn(isAuthenticated())
+            setUserType(getUserType())
+            
+            if (!isAuthenticated()) {
+                navigate('/')
+                return
+            }
+            
+            // Verify auth with backend
+            const isValid = await verifyAuth()
+            if (!isValid) {
+                setIsLoggedIn(false)
+                setUserType(null)
+                navigate('/')
+            }
         }
+        
+        checkAuth()
     }, [navigate])
 
     // Fetch saved videos
