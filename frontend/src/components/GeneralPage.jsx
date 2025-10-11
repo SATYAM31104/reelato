@@ -18,26 +18,50 @@ function GeneralPage() {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        // Create mobile-friendly axios instance
-        const authAxios = createAuthenticatedAxios()
+      // First check localStorage for quick auth state (mobile-friendly)
+      const storedAuth = localStorage.getItem('isLoggedIn')
+      const storedUserType = localStorage.getItem('userType')
+      
+      if (storedAuth === 'true' && storedUserType) {
+        setIsLoggedIn(true)
+        setUserType(storedUserType)
         
-        // Try to get user info to check if logged in
+        // Verify with server in background (don't block UI)
+        setTimeout(async () => {
+          try {
+            const authAxios = createAuthenticatedAxios()
+            await authAxios.get('/api/auth/me')
+          } catch (error) {
+            // Only clear auth if server explicitly rejects
+            if (error.response?.status === 401) {
+              setIsLoggedIn(false)
+              setUserType(null)
+              localStorage.removeItem('isLoggedIn')
+              localStorage.removeItem('userType')
+              localStorage.removeItem('authToken')
+            }
+          }
+        }, 1000)
+        
+        return
+      }
+      
+      // If no stored auth, check with server
+      try {
+        const authAxios = createAuthenticatedAxios()
         const response = await authAxios.get('/api/auth/me')
         if (response.data) {
           setIsLoggedIn(true)
-          setUserType(response.data.type) // 'user' or 'foodPartner'
-          
-          // Store auth state in localStorage for mobile
+          setUserType(response.data.type)
           localStorage.setItem('isLoggedIn', 'true')
           localStorage.setItem('userType', response.data.type)
         }
       } catch (error) {
-        // User not logged in, that's fine
         setIsLoggedIn(false)
         setUserType(null)
         localStorage.removeItem('isLoggedIn')
         localStorage.removeItem('userType')
+        localStorage.removeItem('authToken')
       }
     }
 

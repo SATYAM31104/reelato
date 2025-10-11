@@ -33,14 +33,14 @@ async function registerUser(req, res) {
         console.log('User created successfully:', user._id);
 
         // Generate JWT token
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
         // Set cookie and send response
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 day in milliseconds
             domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
         });
         
@@ -75,12 +75,12 @@ async function loginUser(req, res) {
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 day in milliseconds
             domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
         });
         
@@ -125,12 +125,12 @@ async function registerFoodPartner(req, res) {
             phone,
             address
         });
-        const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 day in milliseconds
             domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
         });
         
@@ -164,12 +164,12 @@ async function loginFoodPartner(req, res) {
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid Email or Password" });
         }
-        const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-            maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 day in milliseconds
             domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
         });
         
