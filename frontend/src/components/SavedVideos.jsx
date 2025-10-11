@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createSimpleAxios, { getAuth, simpleLogout } from '../utils/simpleAuth'
+import createAuthAxios, { isAuthenticated, getUserType, logout } from '../utils/reliableAuth'
 
 const SavedVideos = () => {
     const navigate = useNavigate()
@@ -14,11 +14,10 @@ const SavedVideos = () => {
 
     // Simple auth check
     useEffect(() => {
-        const auth = getAuth()
-        setIsLoggedIn(auth.isLoggedIn)
-        setUserType(auth.userType)
+        setIsLoggedIn(isAuthenticated())
+        setUserType(getUserType())
         
-        if (!auth.isLoggedIn) {
+        if (!isAuthenticated()) {
             navigate('/')
             return
                     navigate('/')
@@ -39,8 +38,8 @@ const SavedVideos = () => {
                 console.log('User logged in:', isLoggedIn)
                 console.log('User type:', userType)
                 
-                const simpleAxios = createSimpleAxios()
-                const response = await simpleAxios.get('/api/food/saved')
+                const authAxios = createAuthAxios()
+                const response = await authAxios.get('/api/food/saved')
                 
                 console.log('Saved videos response:', response.data)
                 console.log('Response status:', response.status)
@@ -74,8 +73,8 @@ const SavedVideos = () => {
     // Handle unsave
     const handleUnsave = async (foodId) => {
         try {
-            const simpleAxios = createSimpleAxios()
-            await simpleAxios.post('/api/food/save', { foodId })
+            const authAxios = createAuthAxios()
+            await authAxios.post('/api/food/save', { foodId })
             
             // Remove from saved videos
             setSavedVideos(prev => prev.filter(video => video.id !== foodId))
@@ -203,8 +202,8 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const simpleAxios = createSimpleAxios()
-                                        const response = await simpleAxios.get('/api/food/test-auth')
+                                        const authAxios = createAuthAxios()
+                                        const response = await authAxios.get('/api/food/test-auth')
                                         console.log('Auth test response:', response.data)
                                         alert('Authentication test successful!')
                                     } catch (error) {
@@ -228,8 +227,8 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const simpleAxios = createSimpleAxios()
-                                        const response = await simpleAxios.get('/api/food/saved-simple')
+                                        const authAxios = createAuthAxios()
+                                        const response = await authAxios.get('/api/food/saved-simple')
                                         console.log('Simple saved test response:', response.data)
                                         alert(`Simple test successful! Found ${response.data.count} saves`)
                                     } catch (error) {
@@ -530,7 +529,7 @@ const SavedVideos = () => {
                 <button
                     onClick={async () => {
                         try {
-                            simpleLogout()
+                            logout()
                             setUserType(null)
                             localStorage.removeItem('isLoggedIn')
                             localStorage.removeItem('userType')

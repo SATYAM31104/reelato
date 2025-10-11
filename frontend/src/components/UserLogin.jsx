@@ -4,7 +4,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from '../config/api'
-import { simpleLogin } from '../utils/simpleAuth'
+import { login } from '../utils/reliableAuth'
 
 function UserLogin() {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ function UserLogin() {
       }
 
       // API call to login user
-      const response = await simpleLogin('/api/auth/user/login', {
+      const response = await login('/api/auth/user/login', {
         email: formData.email,
         password: formData.password
       });

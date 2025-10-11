@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createSimpleAxios, { getAuth } from '../utils/simpleAuth'
+import createAuthAxios, { isAuthenticated, getUserType } from '../utils/reliableAuth'
 
 const HomePage = () => {
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
@@ -23,14 +23,8 @@ const HomePage = () => {
     // Check authentication status
     useEffect(() => {
         const checkAuthStatus = () => {
-            const auth = getAuth()
-            if (auth.isLoggedIn) {
-                setIsLoggedIn(true)
-                setUserType(auth.userType)
-            } else {
-                setIsLoggedIn(false)
-                setUserType(null)
-            }
+            setIsLoggedIn(isAuthenticated())
+            setUserType(getUserType())
 
                 if (storedAuth === 'true' && storedUserType) {
                     setIsLoggedIn(true)
@@ -88,8 +82,8 @@ const HomePage = () => {
         }
 
         try {
-            const simpleAxios = createSimpleAxios()
-            const response = await simpleAxios.post('/api/food/like', { foodId })
+            const authAxios = createAuthAxios()
+            const response = await authAxios.post('/api/food/like', { foodId })
 
             setLikes(prev => ({
                 ...prev,
@@ -174,8 +168,8 @@ const HomePage = () => {
         }
 
         try {
-            const simpleAxios = createSimpleAxios()
-            const response = await simpleAxios.post('/api/food/save', { foodId })
+            const authAxios = createAuthAxios()
+            const response = await authAxios.post('/api/food/save', { foodId })
 
             setSaves(prev => ({
                 ...prev,
@@ -224,8 +218,8 @@ const HomePage = () => {
         if (!newComment.trim()) return
 
         try {
-            const simpleAxios = createSimpleAxios()
-            await simpleAxios.post('/api/food/comment', { foodId, text: newComment })
+            const authAxios = createAuthAxios()
+            await authAxios.post('/api/food/comment', { foodId, text: newComment })
 
             setNewComment('')
             // Refresh comments

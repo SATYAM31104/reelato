@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import { getAuth, simpleLogout } from '../utils/simpleAuth'
+import { isAuthenticated, getUserType, logout } from '../utils/reliableAuth'
 
 function GeneralPage() {
   const [videos, setVideos] = useState([])
@@ -17,10 +17,9 @@ function GeneralPage() {
   const [userType, setUserType] = useState(null) // 'user' or 'foodPartner'
 
   useEffect(() => {
-    // Simple auth check - just use localStorage
-    const auth = getAuth()
-    setIsLoggedIn(auth.isLoggedIn)
-    setUserType(auth.userType)
+    // Ultra-simple auth check
+    setIsLoggedIn(isAuthenticated())
+    setUserType(getUserType())
   }, [])
 
   // Fetch food items from backend
@@ -119,7 +118,7 @@ function GeneralPage() {
               {isLoggedIn ? (
                 <button
                   onClick={() => {
-                    simpleLogout()
+                    logout()
                   }}
                   className="btn-secondary"
                   style={{ 
