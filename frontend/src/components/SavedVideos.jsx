@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
+import createAuthenticatedAxios, { logoutWithMobileSupport } from '../utils/mobileAuth'
 
 const SavedVideos = () => {
     const navigate = useNavigate()
@@ -11,13 +12,23 @@ const SavedVideos = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userType, setUserType] = useState(null)
 
-    // Check authentication status
+    // Check authentication status (mobile-friendly)
     useEffect(() => {
         const checkAuthStatus = async () => {
+            // First check localStorage for quick auth state (mobile-friendly)
+            const storedAuth = localStorage.getItem('isLoggedIn')
+            const storedUserType = localStorage.getItem('userType')
+            
+            if (storedAuth === 'true' && storedUserType) {
+                setIsLoggedIn(true)
+                setUserType(storedUserType)
+                return // Don't make server call if we have stored auth
+            }
+            
+            // If no stored auth, check with server
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
-                    withCredentials: true
-                })
+                const authAxios = createAuthenticatedAxios()
+                const response = await authAxios.get('/api/auth/me')
                 if (response.data) {
                     setIsLoggedIn(true)
                     setUserType(response.data.type)
@@ -25,18 +36,11 @@ const SavedVideos = () => {
                     localStorage.setItem('userType', response.data.type)
                 }
             } catch (error) {
-                // Check localStorage for auth state
-                const storedAuth = localStorage.getItem('isLoggedIn')
-                const storedUserType = localStorage.getItem('userType')
-                
-                if (storedAuth === 'true' && storedUserType) {
-                    setIsLoggedIn(true)
-                    setUserType(storedUserType)
-                } else {
-                    setIsLoggedIn(false)
-                    setUserType(null)
-                    localStorage.removeItem('isLoggedIn')
-                    localStorage.removeItem('userType')
+                setIsLoggedIn(false)
+                setUserType(null)
+                localStorage.removeItem('isLoggedIn')
+                localStorage.removeItem('userType')
+                localStorage.removeItem('authToken')
                     navigate('/')
                 }
             }
@@ -55,9 +59,8 @@ const SavedVideos = () => {
                 console.log('User logged in:', isLoggedIn)
                 console.log('User type:', userType)
                 
-                const response = await axios.get(`${API_BASE_URL}/api/food/saved`, {
-                    withCredentials: true
-                })
+                const authAxios = createAuthenticatedAxios()
+                const response = await authAxios.get('/api/food/saved')
                 
                 console.log('Saved videos response:', response.data)
                 console.log('Response status:', response.status)
@@ -91,10 +94,8 @@ const SavedVideos = () => {
     // Handle unsave
     const handleUnsave = async (foodId) => {
         try {
-            await axios.post(`${API_BASE_URL}/api/food/save`, 
-                { foodId }, 
-                { withCredentials: true }
-            )
+            const authAxios = createAuthenticatedAxios()
+            await authAxios.post('/api/food/save', { foodId })
             
             // Remove from saved videos
             setSavedVideos(prev => prev.filter(video => video.id !== foodId))
@@ -222,9 +223,8 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const response = await axios.get(`${API_BASE_URL}/api/food/test-auth`, {
-                                            withCredentials: true
-                                        })
+                                        const authAxios = createAuthenticatedAxios()
+                                        const response = await authAxios.get('/api/food/test-auth')
                                         console.log('Auth test response:', response.data)
                                         alert('Authentication test successful!')
                                     } catch (error) {
@@ -248,9 +248,8 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const response = await axios.get(`${API_BASE_URL}/api/food/saved-simple`, {
-                                            withCredentials: true
-                                        })
+                                        const authAxios = createAuthenticatedAxios()
+                                        const response = await authAxios.get('/api/food/saved-simple')
                                         console.log('Simple saved test response:', response.data)
                                         alert(`Simple test successful! Found ${response.data.count} saves`)
                                     } catch (error) {
@@ -551,9 +550,7 @@ const SavedVideos = () => {
                 <button
                     onClick={async () => {
                         try {
-                            await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
-                                withCredentials: true
-                            })
+                            await logoutWithMobileSupport()
                             setIsLoggedIn(false)
                             setUserType(null)
                             localStorage.removeItem('isLoggedIn')
