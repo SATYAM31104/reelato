@@ -38,8 +38,8 @@ async function registerUser(req, res) {
         // Set cookie and send response
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Set to true in production with HTTPS
-            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
         console.log('Cookie set for user:', user._id);
@@ -70,8 +70,8 @@ async function loginUser(req, res) {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Set to true in production with HTTPS
-            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
         res.status(200).json({
@@ -111,8 +111,8 @@ async function registerFoodPartner(req, res) {
         const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Set to true in production with HTTPS
-            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
         res.status(201).json({
@@ -142,8 +142,8 @@ async function loginFoodPartner(req, res) {
         const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Set to true in production with HTTPS
-            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
         console.log('Cookie set for food partner:', foodPartner._id);

@@ -80,7 +80,7 @@ function GeneralPage() {
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }}>
       {/* Header */}
       <header style={{
-        padding: '1rem 2rem',
+        padding: window.innerWidth > 768 ? '1rem 2rem' : '0.8rem 1rem',
         borderBottom: '1px solid var(--border-color)',
         backgroundColor: 'var(--card-bg)',
         position: 'sticky',
@@ -94,10 +94,16 @@ function GeneralPage() {
             duration={0.3}
             triggerOnHover={true}
           />
-          <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <a href="/" style={{ color: 'var(--text-color)', textDecoration: 'none' }}>Home</a>
-            <a href="/general" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600' }}>Browse</a>
-            <a href="/feed" style={{ color: 'var(--text-color)', textDecoration: 'none' }}>Full Feed</a>
+          <nav style={{ 
+            display: 'flex', 
+            gap: window.innerWidth > 768 ? '2rem' : '1rem', 
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            fontSize: window.innerWidth > 768 ? '1rem' : '0.85rem'
+          }}>
+            <a href="/" style={{ color: 'var(--text-color)', textDecoration: 'none', whiteSpace: 'nowrap' }}>Home</a>
+            <a href="/general" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap' }}>Browse</a>
+            <a href="/feed" style={{ color: 'var(--text-color)', textDecoration: 'none', whiteSpace: 'nowrap' }}>Feed</a>
 
             {/* Food Partner Upload Option */}
             {isLoggedIn && userType === 'foodPartner' && (
@@ -109,14 +115,20 @@ function GeneralPage() {
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.3rem',
+                  whiteSpace: 'nowrap',
+                  fontSize: window.innerWidth > 768 ? '1rem' : '0.8rem'
                 }}
               >
-                🍽️ Upload Your Own Food
+                🍽️ {window.innerWidth > 768 ? 'Upload Your Own Food' : 'Upload'}
               </a>
             )}
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: window.innerWidth > 768 ? '1rem' : '0.5rem',
+              marginLeft: 'auto'
+            }}>
               {isLoggedIn ? (
                 <button
                   onClick={async () => {
@@ -132,14 +144,25 @@ function GeneralPage() {
                     }
                   }}
                   className="btn-secondary"
-                  style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                  style={{ 
+                    padding: window.innerWidth > 768 ? '0.5rem 1rem' : '0.4rem 0.8rem', 
+                    fontSize: window.innerWidth > 768 ? '0.9rem' : '0.8rem'
+                  }}
                 >
                   Logout
                 </button>
               ) : (
                 <>
-                  <a href="/user/login" className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Login</a>
-                  <a href="/user/register" className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Sign Up</a>
+                  <a href="/user/login" className="btn-secondary" style={{ 
+                    padding: window.innerWidth > 768 ? '0.5rem 1rem' : '0.4rem 0.8rem', 
+                    fontSize: window.innerWidth > 768 ? '0.9rem' : '0.8rem',
+                    whiteSpace: 'nowrap'
+                  }}>Login</a>
+                  <a href="/user/register" className="btn-primary" style={{ 
+                    padding: window.innerWidth > 768 ? '0.5rem 1rem' : '0.4rem 0.8rem', 
+                    fontSize: window.innerWidth > 768 ? '0.9rem' : '0.8rem',
+                    whiteSpace: 'nowrap'
+                  }}>Sign Up</a>
                 </>
               )}
             </div>
