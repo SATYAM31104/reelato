@@ -92,7 +92,8 @@ async function loginUser(req, res) {
         });
         res.status(200).json({
             message: "User logged in successfully",
-            user: { name: user.name, email: user.email }
+            user: { name: user.name, email: user.email },
+            token: token // Include token for mobile localStorage fallback
         });
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
@@ -185,7 +186,8 @@ async function loginFoodPartner(req, res) {
                 restaurantName: foodPartner.restaurantName,
                 ownerName: foodPartner.ownerName,
                 email: foodPartner.email
-            }
+            },
+            token: token // Include token for mobile localStorage fallback
         });
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
+import createAuthenticatedAxios, { logoutWithMobileSupport } from '../utils/mobileAuth'
 
 function GeneralPage() {
   const [videos, setVideos] = useState([])
@@ -18,18 +19,25 @@ function GeneralPage() {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
+        // Create mobile-friendly axios instance
+        const authAxios = createAuthenticatedAxios()
+        
         // Try to get user info to check if logged in
-        const response = await axios.get(`${API_BASE_URL}/api/auth/me`, {
-          withCredentials: true
-        })
+        const response = await authAxios.get('/api/auth/me')
         if (response.data) {
           setIsLoggedIn(true)
           setUserType(response.data.type) // 'user' or 'foodPartner'
+          
+          // Store auth state in localStorage for mobile
+          localStorage.setItem('isLoggedIn', 'true')
+          localStorage.setItem('userType', response.data.type)
         }
       } catch (error) {
         // User not logged in, that's fine
         setIsLoggedIn(false)
         setUserType(null)
+        localStorage.removeItem('isLoggedIn')
+        localStorage.removeItem('userType')
       }
     }
 
@@ -133,9 +141,7 @@ function GeneralPage() {
                 <button
                   onClick={async () => {
                     try {
-                      await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
-                        withCredentials: true
-                      })
+                      await logoutWithMobileSupport()
                       setIsLoggedIn(false)
                       setUserType(null)
                       navigate('/')
