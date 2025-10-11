@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createAuthenticatedAxios, { logoutWithMobileSupport, getAuthState, setAuthState } from '../utils/mobileAuth'
+import { getAuth, simpleLogout } from '../utils/simpleAuth'
 
 function GeneralPage() {
   const [videos, setVideos] = useState([])
@@ -17,31 +17,10 @@ function GeneralPage() {
   const [userType, setUserType] = useState(null) // 'user' or 'foodPartner'
 
   useEffect(() => {
-    // Use the global auth state (mobile-first approach)
-    const authState = getAuthState()
-    setIsLoggedIn(authState.isLoggedIn)
-    setUserType(authState.userType)
-    
-    // Only verify with server if we don't have auth state and it's been a while
-    const shouldVerify = !authState.isLoggedIn && (Date.now() - authState.lastCheck > 60000) // 1 minute
-    
-    if (shouldVerify) {
-      // Background verification (don't block UI or cause logout)
-      setTimeout(async () => {
-        try {
-          const authAxios = createAuthenticatedAxios()
-          const response = await authAxios.get('/api/auth/me')
-          if (response.data) {
-            setAuthState(true, response.data.type)
-            setIsLoggedIn(true)
-            setUserType(response.data.type)
-          }
-        } catch (error) {
-          // Don't clear auth on network errors, only on explicit auth failures
-          console.log('Background auth check failed, but not clearing state')
-        }
-      }, 2000)
-    }
+    // Simple auth check - just use localStorage
+    const auth = getAuth()
+    setIsLoggedIn(auth.isLoggedIn)
+    setUserType(auth.userType)
   }, [])
 
   // Fetch food items from backend
@@ -139,15 +118,8 @@ function GeneralPage() {
             }}>
               {isLoggedIn ? (
                 <button
-                  onClick={async () => {
-                    try {
-                      await logoutWithMobileSupport()
-                      setIsLoggedIn(false)
-                      setUserType(null)
-                      navigate('/')
-                    } catch (error) {
-                      console.error('Logout error:', error)
-                    }
+                  onClick={() => {
+                    simpleLogout()
                   }}
                   className="btn-secondary"
                   style={{ 

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from '../config/api'
-import { loginWithMobileSupport } from '../utils/mobileAuth'
+import { simpleLogin } from '../utils/simpleAuth'
 
 function UserLogin() {
   const navigate = useNavigate();
@@ -53,8 +53,8 @@ function UserLogin() {
         return;
       }
 
-      // API call to login user with mobile support
-      const response = await loginWithMobileSupport('/api/auth/user/login', {
+      // API call to login user
+      const response = await simpleLogin('/api/auth/user/login', {
         email: formData.email,
         password: formData.password
       });

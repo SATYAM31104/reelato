@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { API_BASE_URL } from '../config/api'
-import createAuthenticatedAxios, { logoutWithMobileSupport, getAuthState, setAuthState } from '../utils/mobileAuth'
+import createSimpleAxios, { getAuth, simpleLogout } from '../utils/simpleAuth'
 
 const SavedVideos = () => {
     const navigate = useNavigate()
@@ -12,15 +12,13 @@ const SavedVideos = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userType, setUserType] = useState(null)
 
-    // Check authentication status (mobile-first, no server calls)
+    // Simple auth check
     useEffect(() => {
-        // Use the global auth state - no server verification to prevent logout
-        const authState = getAuthState()
-        setIsLoggedIn(authState.isLoggedIn)
-        setUserType(authState.userType)
+        const auth = getAuth()
+        setIsLoggedIn(auth.isLoggedIn)
+        setUserType(auth.userType)
         
-        // If not logged in, redirect immediately without server check
-        if (!authState.isLoggedIn) {
+        if (!auth.isLoggedIn) {
             navigate('/')
             return
                     navigate('/')
@@ -41,8 +39,8 @@ const SavedVideos = () => {
                 console.log('User logged in:', isLoggedIn)
                 console.log('User type:', userType)
                 
-                const authAxios = createAuthenticatedAxios()
-                const response = await authAxios.get('/api/food/saved')
+                const simpleAxios = createSimpleAxios()
+                const response = await simpleAxios.get('/api/food/saved')
                 
                 console.log('Saved videos response:', response.data)
                 console.log('Response status:', response.status)
@@ -76,8 +74,8 @@ const SavedVideos = () => {
     // Handle unsave
     const handleUnsave = async (foodId) => {
         try {
-            const authAxios = createAuthenticatedAxios()
-            await authAxios.post('/api/food/save', { foodId })
+            const simpleAxios = createSimpleAxios()
+            await simpleAxios.post('/api/food/save', { foodId })
             
             // Remove from saved videos
             setSavedVideos(prev => prev.filter(video => video.id !== foodId))
@@ -205,8 +203,8 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const authAxios = createAuthenticatedAxios()
-                                        const response = await authAxios.get('/api/food/test-auth')
+                                        const simpleAxios = createSimpleAxios()
+                                        const response = await simpleAxios.get('/api/food/test-auth')
                                         console.log('Auth test response:', response.data)
                                         alert('Authentication test successful!')
                                     } catch (error) {
@@ -230,8 +228,8 @@ const SavedVideos = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const authAxios = createAuthenticatedAxios()
-                                        const response = await authAxios.get('/api/food/saved-simple')
+                                        const simpleAxios = createSimpleAxios()
+                                        const response = await simpleAxios.get('/api/food/saved-simple')
                                         console.log('Simple saved test response:', response.data)
                                         alert(`Simple test successful! Found ${response.data.count} saves`)
                                     } catch (error) {
@@ -532,8 +530,7 @@ const SavedVideos = () => {
                 <button
                     onClick={async () => {
                         try {
-                            await logoutWithMobileSupport()
-                            setIsLoggedIn(false)
+                            simpleLogout()
                             setUserType(null)
                             localStorage.removeItem('isLoggedIn')
                             localStorage.removeItem('userType')
