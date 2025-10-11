@@ -20,11 +20,7 @@ const SavedVideos = () => {
         if (!isAuthenticated()) {
             navigate('/')
             return
-                    navigate('/')
-                }
-            }
         }
-        checkAuthStatus()
     }, [navigate])
 
     // Fetch saved videos
