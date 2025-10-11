@@ -14,10 +14,10 @@ app.use(cookieParser());
 
 // CORS configuration
 app.use(cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
         // Allow requests with no origin (like Postman, mobile apps)
         if (!origin) return callback(null, true);
-        
+
         // In production, allow Vercel domains and specific frontend URL
         if (process.env.NODE_ENV === 'production') {
             if (origin.endsWith('.vercel.app') || origin === process.env.FRONTEND_URL) {
@@ -25,13 +25,13 @@ app.use(cors({
             }
             return callback(new Error('CORS policy blocked this origin'), false);
         }
-        
+
         // In development, allow localhost
         const allowedLocalOrigins = ['http://localhost:5173', 'http://localhost:3000'];
         if (allowedLocalOrigins.includes(origin)) {
             return callback(null, true);
         }
-        
+
         return callback(new Error('CORS policy blocked this origin'), false);
     },
     credentials: true,
@@ -59,12 +59,10 @@ app.get('/api/test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/food', foodRoutes);
 
-// Start server only in local development
-if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`Server is running at port ${PORT}`);
-    });
-}
+// Start server (both development and production)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running at port ${PORT}`);
+});
 
 module.exports = app;
