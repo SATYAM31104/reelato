@@ -25,17 +25,6 @@ const HomePage = () => {
         const checkAuthStatus = () => {
             setIsLoggedIn(isAuthenticated())
             setUserType(getUserType())
-
-                if (storedAuth === 'true' && storedUserType) {
-                    setIsLoggedIn(true)
-                    setUserType(storedUserType)
-                } else {
-                    setIsLoggedIn(false)
-                    setUserType(null)
-                    localStorage.removeItem('isLoggedIn')
-                    localStorage.removeItem('userType')
-                }
-            }
         }
         checkAuthStatus()
     }, [])
